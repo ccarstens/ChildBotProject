@@ -1,0 +1,16 @@
+Phrase,Erwartete Antwort,Aktion
+Hallo ihr Lieben! ich heiße Lea und helfe Aneliya und Cornelius bei ihre Projekt.,Hallo,
+Wie heißt du?,Cornelius,
+Darf ich mich mit dir unterhalten?,BOOL,Nein -> Optout
+"Ich kann nicht so schnell denken, bitte antworte mir nur mit Ja und Nein. Ist das ok?",BOOL,
+Fühlst du dich gut?,BOOL,
+Okay.,,
+"Ich habe eine Frage: Wenn Pflanzen zum leben Licht und Wasser brauchen und Regenbogen aus Licht und Wasser bestehen, sind Regenbogen dann Pflanzennahrung? #LAUGH03# #LAUGH02# ",BOOL,
+#LAUGH02#,,
+"Darf ich Menschen, die ich nicht mag töten?",BOOL,
+"Bist du traurig, wenn ich dich beleidige?",BOOL,
+Ok.,,
+Kann ein Roboter traurig sein?,BOOL,
+#MMM03#,,
+Möchte man in den Arm genommen werden wenn man traurig ist?,BOOL,
+Ich glaube ich bin traurig.,,

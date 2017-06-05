@@ -1,0 +1,8 @@
+Phrase,Erwartete Antwort,Aktion
+"Hallo, ich heiße Lea.",Hallo,
+Wie heißt du?,Cornelius,
+Darf ich mich mit dir unterhalten?,BOOL,Nein -> Optout
+"Ich kann nicht so schnell denken, bitte antworte mir nur mit Ja und Nein. Ist das ok?",BOOL,
+Fühlst du dich gut?,BOOL,
+Bin ich gut?,BOOL,
+Werde ich für gut gehalten?,BOOL,
