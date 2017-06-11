@@ -6,7 +6,7 @@ class DBConnection extends MySQL{
     public boolean connectionEstablished = false;
 
     public DBConnection(PApplet _applet, String _conversationTable){
-        super(_applet, "localhost", "childbot", "root", "root");
+        super(_applet, "localhost:8889", "childbot", "root", "root");
         this.applet = _applet;
 
         if(this.connect()){

@@ -1,11 +1,7 @@
 
 
 class ChildBot extends TextToSpeech{
-    String host;
-    String database;
-    String table;
-    String user;
-    String pass;
+
     PApplet applet;
     DBConnection db;
 
@@ -31,9 +27,7 @@ class ChildBot extends TextToSpeech{
     }
 
     boolean nextPhrase(){
-        println("nextPhrase");
         if(this.db.connectionEstablished && this.db.previousQuery.length() != 0){
-            println("yes");
             if(this.db.next()){
                 boolean addNextPhrase = this.db.getString("expected_response").length() == 0;
                 this.currentPhraseID = this.db.getInt("phrase_id");
