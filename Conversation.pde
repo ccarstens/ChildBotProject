@@ -25,10 +25,6 @@ class Conversation{
             this.human.sendMessage("READY");
             println("message sent to semi-non-human");
         }
-        if(this.bot.justFinished){
-
-            this.bot.justFinished = false;
-        }
     }
 
     void onWebSocketMessage(String _message){

@@ -54,10 +54,10 @@ class ChildBot extends TextToSpeech{
     }
 
     boolean nextPhrase(){
+        println("nextPhrase");
         if(this.connectionEstablished && this.query.length() != 0){
             if(this.db.next()){
-                boolean addNextPhrase = this.db.getString("expected_answer").length() == 0;
-                this.currentQuestion = this.db.getInt("id");
+                boolean addNextPhrase = this.db.getString("expected_response").length() == 0;
                 this.speak(this.db.getString("q"), addNextPhrase);
                 if(addNextPhrase){
                     this.nextPhrase();
@@ -70,7 +70,7 @@ class ChildBot extends TextToSpeech{
 
     void switchTable(String _table){
         this.table = _table;
-        this.runQuery("SELECT * FROM " + this.table);
+        this.runQuery("SELECT * FROM " + this.table + " LEFT JOIN general_questions ON phrase_id = general_questions.id");
     }
 
 }

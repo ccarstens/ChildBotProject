@@ -1,6 +1,7 @@
-Conversation c = new Conversation(this, "Lea",  "localhost:8889", "childbot", "zwischenpraesenation", "root", "root", 7777, "/childbo");
+Conversation c = new Conversation(this, "Lea",  "localhost:8889", "childbot", "conversation_1", "root", "root", 7777, "/childbo");
 
 void setup(){
+    delay(2000);
     c.communicate();
 
 }
