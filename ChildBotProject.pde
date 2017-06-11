@@ -4,9 +4,6 @@ void setup(){
     c.communicate();
 
 }
-void draw(){
-
-}
 
 void webSocketServerEvent(String _message){
     c.onWebSocketMessage(_message);
