@@ -14,7 +14,7 @@ class ChildBot extends TextToSpeech{
     String query;
 
     boolean justFinished;
-
+    int currentQuestion;
 
     ChildBot(PApplet _applet, String _voice, String _host, String _database, String _table, String _user, String _pass){
         super(_voice);
@@ -53,16 +53,19 @@ class ChildBot extends TextToSpeech{
         }
     }
 
-    void nextPhrase(){
+    boolean nextPhrase(){
         if(this.connectionEstablished && this.query.length() != 0){
             if(this.db.next()){
                 boolean addNextPhrase = this.db.getString("expected_answer").length() == 0;
+                this.currentQuestion = this.db.getInt("id");
                 this.speak(this.db.getString("q"), addNextPhrase);
                 if(addNextPhrase){
                     this.nextPhrase();
                 }
+                return true;
             }
         }
+        return false;
     }
 
     void switchTable(String _table){

@@ -19,10 +19,22 @@ class Conversation{
     }
 
     void communicate(){
-        if(this.bot.justFinished){
+        if(this.bot.nextPhrase()){
+            println("Frage: " + this.bot.currentQuestion);
+            //run code afterspeaking, set current question id etc
             this.human.sendMessage("READY");
             println("message sent to human");
+        }
+        if(this.bot.justFinished){
+
             this.bot.justFinished = false;
         }
+    }
+
+    void onWebSocketMessage(String _message){
+
+        //run code for anwer processing
+        println("HUMAN: " + _message);
+        this.communicate();
     }
 }
