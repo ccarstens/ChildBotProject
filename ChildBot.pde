@@ -7,8 +7,7 @@ class ChildBot extends TextToSpeech{
     String user;
     String pass;
     PApplet applet;
-    MySQL db;
-    boolean connectionEstablished;
+    DBConnection db;
 
     String query;
 
@@ -18,6 +17,9 @@ class ChildBot extends TextToSpeech{
         super(_voice);
 
         this.applet = _applet;
+
+        this.db = new DBConnection(this.applet, _conversationTable);
+        this.db.switchToConversationTable(_conversationTable);
 
     }
 
@@ -30,7 +32,8 @@ class ChildBot extends TextToSpeech{
 
     boolean nextPhrase(){
         println("nextPhrase");
-        if(this.connectionEstablished && this.query.length() != 0){
+        if(this.db.connectionEstablished && this.db.previousQuery.length() != 0){
+            println("yes");
             if(this.db.next()){
                 boolean addNextPhrase = this.db.getString("expected_response").length() == 0;
                 this.currentPhraseID = this.db.getInt("phrase_id");

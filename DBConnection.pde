@@ -1,15 +1,14 @@
 class DBConnection extends MySQL{
 
-    public String server = "localhost";
-    public String database = "childbot";
-    public String user = "root";
-    public String pass = "root";
+    public PApplet applet;
     public String conversationTable;
 
-    public bool connectionEstablished = false;
+    public boolean connectionEstablished = false;
 
-    public DBConnection(PApplet _papplet){
-        super(_papplet, server, database, user, pass);
+    public DBConnection(PApplet _applet, String _conversationTable){
+        super(_applet, "localhost", "childbot", "root", "root");
+        this.applet = _applet;
+
         if(this.connect()){
             this.connectionEstablished = true;
         }
@@ -22,7 +21,10 @@ class DBConnection extends MySQL{
     }
 
     public void switchToConversationTable(String _table){
-        this.conversationTable = _table;
-        this.runQuery("SELECT * FROM " + this.table + " LEFT JOIN general_questions ON phrase_id = general_questions.id");
+        if(this.connectionEstablished){
+            this.conversationTable = _table;
+            this.runQuery("SELECT * FROM " + this.conversationTable + " LEFT JOIN general_questions ON phrase_id = general_questions.id");
+        }
+
     }
 }
