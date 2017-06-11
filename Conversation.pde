@@ -21,6 +21,7 @@ class Conversation{
     void communicate(){
         if(this.bot.justFinished){
             this.human.sendMessage("READY");
+            println("message sent to human");
             this.bot.justFinished = false;
         }
     }
