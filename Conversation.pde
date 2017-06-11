@@ -23,7 +23,7 @@ class Conversation{
             println("Frage: " + this.bot.currentQuestion);
             //run code afterspeaking, set current question id etc
             this.human.sendMessage("READY");
-            println("message sent to human");
+            println("message sent to non-human");
         }
         if(this.bot.justFinished){
 
