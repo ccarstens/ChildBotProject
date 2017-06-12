@@ -31,16 +31,23 @@ class DBConnection extends MySQL{
 
     }
 
-    public int[] getBooleanResponseData(String _response){
-        String query = String.format("SELECT * FROM %s WHERE content LIKE '%s'", "boolean_response_labels", _response);
+    public int[] getResponsePhraseData(String _response){
+        String query = String.format("SELECT * FROM response_phrases WHERE content LIKE '%s'", _response);
         int[] returnValues;
         if(this.getResultCount(query) > 0){
             this.query(query);
             this.next();
-            return new int[]{this.getInt("id"), this.getInt("meaning_id")};
+
         }else{
-            return new int[]{-1};
+            println("Start updating response_phrase table");
+            this.query("INSERT INTO response_phrases (content) VALUES ('%s')", _response);
+            println("END updating");
+            println("Start Select");
+            this.query("SELECT * FROM response_phrases ORDER BY id DESC LIMIT 1");
+            this.next();
+            println("END SELECT");
         }
+        return new int[]{this.getInt("id"), this.getInt("meaning_id")};
     }
 
     public int getResultCount(String _query){
@@ -50,13 +57,6 @@ class DBConnection extends MySQL{
     }
 
     public void logResponseWithID(int _phrase_id, int _response_id){
-        println("LOG START");
-        String query = String.format("INSERT INTO responses (session_id, phrase_id, response_id) VALUES (%s, %s, %s)", 99, _phrase_id, _response_id);
-        this.query(query);
-        println("LOG END");
-    }
-
-    public void logResponseWithMessage(int _phrase_id, String _message){
-        this.query("INSERT INTO responses (session_id, phrase_id, variable_response_content) VALUES (%s, %s, '%s')", 60, _phrase_id, _message);
+        this.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", 99, _phrase_id, _response_id);
     }
 }
