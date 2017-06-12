@@ -31,21 +31,32 @@ class DBConnection extends MySQL{
 
     }
 
-    public int getBooleanResponseID(String _response){
+    public int[] getBooleanResponseData(String _response){
         String query = String.format("SELECT * FROM %s WHERE content LIKE '%s'", "boolean_response_labels", _response);
+        int[] returnValues;
         if(this.getResultCount(query) > 0){
             this.query(query);
             this.next();
-            return this.getInt("id");
+            return new int[]{this.getInt("id"), this.getInt("meaning_id")};
         }else{
-            returnn -1;
+            return new int[]{-1};
         }
-
     }
 
     public int getResultCount(String _query){
         this.query(_query.replaceAll("SELECT.*FROM", "SELECT COUNT(*) FROM"));
         this.next();
         return this.getInt(1);
+    }
+
+    public void logResponseWithID(int _phrase_id, int _response_id){
+        println("LOG START");
+        String query = String.format("INSERT INTO responses (session_id, phrase_id, response_id) VALUES (%s, %s, %s)", 99, _phrase_id, _response_id);
+        this.query(query);
+        println("LOG END");
+    }
+
+    public void logResponseWithMessage(int _phrase_id, String _message){
+        this.query("INSERT INTO responses (session_id, phrase_id, variable_response_content) VALUES (%s, %s, '%s')", 60, _phrase_id, _message);
     }
 }

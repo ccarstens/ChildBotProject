@@ -30,9 +30,18 @@ class Conversation{
     void onWebSocketMessage(String _message){
 
         //run code for anwer processing
+        int[] booleanResponseData = this.logConnection.getBooleanResponseData(_message);
+        if(booleanResponseData[0] > -1){
 
-        
-        this.logConnection.query("INSERT INTO results (session_id, phrase_id, variable_response_content) VALUES (13, " + this.bot.currentPhraseID + ", '" + _message + "')");
+            this.logConnection.logResponseWithID(this.bot.currentPhraseID, booleanResponseData[0]);
+            if(booleanResponseData[1] == DBConnection.MEANING_YES){
+                println("Die Aussage des Users war bejahend");
+            }else{
+                println("Die Aussage des Users war verneinend");
+            }
+        }else{
+            this.logConnection.logResponseWithMessage(this.bot.currentPhraseID, _message);
+        }
         println("HUMAN: " + _message);
         this.communicate();
     }
