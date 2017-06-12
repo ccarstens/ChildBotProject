@@ -44,7 +44,7 @@ class Conversation{
         }else if(responsePhraseData[1] == DBConnection.MEANING_NO){
             println("Die Aussage des Users war verneinend");
         }else{
-            println("Es konnte keine Aussage erkannt werden.");
+            println("Die Bedeutung konnte nicht erkannt werden.");
         }
 
 

@@ -31,7 +31,7 @@ class ChildBot extends TextToSpeech{
             if(this.db.next()){
                 boolean addNextPhrase = this.db.getString("expected_response").length() == 0;
                 this.currentPhraseID = this.db.getInt("phrase_id");
-                this.speak(this.db.getString("q"), addNextPhrase);
+                this.speak(this.db.getString("content"), addNextPhrase);
                 if(addNextPhrase){
                     this.nextPhrase();
                 }
