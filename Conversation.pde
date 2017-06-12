@@ -6,10 +6,13 @@ class Conversation{
     int port;
     String domain;
 
-    MySQL db;
+    DBConnection logConnection;
 
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
+
+        this.logConnection = new DBConnection(this.applet);
+
         this.bot = new ChildBot(this.applet, _voice, _table);
 
         this.human = new WebsocketServer(this.applet, 7777, "/childbo");
@@ -27,6 +30,9 @@ class Conversation{
     void onWebSocketMessage(String _message){
 
         //run code for anwer processing
+
+        
+        this.logConnection.query("INSERT INTO results (session_id, phrase_id, variable_response_content) VALUES (13, " + this.bot.currentPhraseID + ", '" + _message + "')");
         println("HUMAN: " + _message);
         this.communicate();
     }

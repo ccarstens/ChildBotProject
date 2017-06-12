@@ -14,7 +14,7 @@ class ChildBot extends TextToSpeech{
 
         this.applet = _applet;
 
-        this.db = new DBConnection(this.applet, _conversationTable);
+        this.db = new DBConnection(this.applet);
         this.db.switchToConversationTable(_conversationTable);
 
     }
@@ -40,6 +40,5 @@ class ChildBot extends TextToSpeech{
         }
         return false;
     }
-
 
 }
