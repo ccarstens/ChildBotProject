@@ -56,7 +56,22 @@ class DBConnection extends MySQL{
         return this.getInt(1);
     }
 
-    public void logResponseWithID(int _phrase_id, int _response_id){
-        this.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", 99, _phrase_id, _response_id);
+    public void logResponseWithID(int _sessionID, int _phrase_id, int _response_id){
+        this.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", _sessionID, _phrase_id, _response_id);
     }
+
+
+
+    public int getNewUserSessionID(){
+        //trigger the CURRENT_TIMESTAMP default value for start_datetime by inserting zero in finish_datetime
+        this.query("INSERT INTO user_sessions (finish_datetime) VALUES (0)");
+        this.query("SELECT * FROM user_sessions ORDER BY id DESC LIMIT 1");
+        this.next();
+        return this.getInt("id");
+    }
+
+    public void closeUserSessionByID(int _sessionID){
+        this.query("UPDATE user_sessions SET u = 1 WHERE id = %s", _sessionID);
+    }
+
 }
