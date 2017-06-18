@@ -26,7 +26,7 @@ class Conversation{
 
         this.userSession = new UserSession(new DBConnection(this.applet));
 
-        this.currentPhrase = new BotPhrase(14, this.db);
+        this.currentPhrase = new BotPhrase(82, this.db);
 
         ResponsePhrase temp = new ResponsePhrase("hallo lea", this.db);
     }
@@ -54,18 +54,25 @@ class Conversation{
 
     void onWebSocketMessage(String _message){
         this.lastResponse = new ResponsePhrase(_message, this.db);
-
+        this.lastPhrase = this.currentPhrase;
         if(currentPhrase.isBool()){
-            println("is bool");
+            println("Meaning ID: " + this.lastResponse.meaningID);
+            if(this.lastResponse.meansYes()){
+                println("means yes");
+                this.currentPhrase = this.lastPhrase.getTrue();
+            }else if(this.lastResponse.meansNo()){
+                println("means no");
+                this.currentPhrase = this.lastPhrase.getFalse();
+            }else{
+                println("iche everstehe nichte");
+            }
         }else{
             println(_message);
             //is string
-            this.lastPhrase = this.currentPhrase;
-            this.currentPhrase = this.currentPhrase.getTrue();
-            this.communicate();
 
+            this.currentPhrase = this.lastPhrase.getTrue();
         }
-
+        this.communicate();
 
 
 

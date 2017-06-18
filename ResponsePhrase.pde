@@ -1,4 +1,6 @@
 class ResponsePhrase extends Phrase{
+    public static final int MEANING_YES = 100;
+    public static final int MEANING_NO = 101;
 
     public int meaningID;
 
@@ -21,8 +23,16 @@ class ResponsePhrase extends Phrase{
             this.db.next();
         }
         this.id = this.db.getInt("id");
-        this.meaningID = this.db.getInt("id");
+        this.meaningID = this.db.getInt("meaning_id");
         this.content = this.db.getString("content");
 
+    }
+
+    public boolean meansYes(){
+        return this.meaningID == ResponsePhrase.MEANING_YES;
+    }
+
+    public boolean meansNo(){
+        return this.meaningID == ResponsePhrase.MEANING_NO;
     }
 }
