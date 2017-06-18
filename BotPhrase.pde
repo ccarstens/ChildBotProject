@@ -17,7 +17,12 @@ class BotPhrase extends Phrase{
         this.isBase = this.db.getBoolean("is_base");
         this.expectedResponseType = this.db.getString("expected_response_type");
         this.isExit = this.db.getBoolean("is_exit_point");
-        this.nextPhraseTrue = this.db.getInt("follow_up_phrase_if_true");
-        this.nextPhraseFalse = this.db.getInt("follow_up_phrase_if_false");
+        this.nextPhraseTrue = this.db.getInt("follow_up_phrase_id_if_true");
+        this.nextPhraseFalse = this.db.getInt("follow_up_phrase_id_if_false");
+    }
+
+    boolean speak(){
+        this.say(this.content);
+        return true;
     }
 }
