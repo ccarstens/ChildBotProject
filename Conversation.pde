@@ -14,6 +14,7 @@ class Conversation{
     BotPhrase currentPhrase;
 
     ResponsePhrase lastResponse;
+    ResponsePhrase lastStringResponse;
 
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
@@ -35,9 +36,8 @@ class Conversation{
         boolean speakingSuccessful;
         if(this.lastPhrase != null){
             println("!= null");
-            if(this.lastPhrase.isString()){
-                println("is string. " + this.lastResponse.content);
-                speakingSuccessful = this.currentPhrase.speak(this.lastResponse.content);
+            if(this.currentPhrase.containsPlaceholder){
+                speakingSuccessful = this.currentPhrase.speak(this.lastString.content);
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
             }
@@ -67,6 +67,7 @@ class Conversation{
                 println("iche everstehe nichte");
             }
         }else{
+            this.lastStringResponse = this.lastResponse;
             println(_message);
             //is string
 

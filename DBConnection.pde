@@ -5,9 +5,6 @@ class DBConnection extends MySQL{
 
     public boolean connectionEstablished = false;
 
-    public static final int MEANING_YES = 100;
-    public static final int MEANING_NO = 101;
-
     public DBConnection(PApplet _applet){
         super(_applet, "localhost:8889", "childbot", "root", "root");
         this.applet = _applet;
