@@ -27,7 +27,7 @@ class Conversation{
 
         this.userSession = new UserSession(new DBConnection(this.applet));
 
-        this.currentPhrase = new BotPhrase(22, this.db);
+        this.currentPhrase = new BotPhrase(14, this.db);
 
         ResponsePhrase temp = new ResponsePhrase("hallo lea", this.db);
     }
@@ -36,7 +36,7 @@ class Conversation{
         boolean speakingSuccessful;
         if(this.lastPhrase != null){
             println("!= null");
-            if(this.currentPhrase.containsPlaceholder){
+            if(this.currentPhrase.containsStringPlaceholder){
                 speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
@@ -95,6 +95,12 @@ class Conversation{
     }
 
     public void specialActionsOnResponse(){
+        if(this.lastPhrase != null){
+            if(this.lastPhrase.id == 15){
+                String tempUserName = this.lastStringResponse.content.replaceAll("(?i)\\b(ich|bin|ist|heiße|mein|name|hallo|hi|nennt|man|mich|kennt|als|der|die|leute|nennen| )\\b", "");
+                this.userSession.userName = tempUserName;
+            }
+        }
 
     }
 }
