@@ -1,0 +1,3 @@
+class BotPhrase extends Phrase{
+    
+}
