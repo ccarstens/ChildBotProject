@@ -2,6 +2,7 @@ class BotPhrase extends Phrase{
 
     public static final String BOOL = "BOOL";
     public static final String STRING = "STRING";
+    public static final String PLACEHOLDER = "$STRING";
 
     public int catID;
     public boolean isBase;
@@ -9,6 +10,7 @@ class BotPhrase extends Phrase{
     public boolean isExit;
     public int nextPhraseTrue;
     public int nextPhraseFalse;
+    public boolean containsPlaceholder;
 
 
 
@@ -22,6 +24,13 @@ class BotPhrase extends Phrase{
         this.isExit = this.db.getBoolean("is_exit_point");
         this.nextPhraseTrue = this.db.getInt("follow_up_phrase_id_if_true");
         this.nextPhraseFalse = this.db.getInt("follow_up_phrase_id_if_false");
+       
+      
+        this.containsPlaceholder = this.content.indexOf(BotPhrase.PLACEHOLDER) != -1;
+        
+
+        
+        
     }
 
     public boolean speak(){
