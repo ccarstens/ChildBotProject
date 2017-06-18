@@ -22,7 +22,9 @@ class Conversation{
         this.human = new WebsocketServer(this.applet, 7777, "/childbo");
 
         this.userSession = new UserSession(new DBConnection(this.applet));
-
+        
+        Phrase myPhrase = new Phrase(33, this.logConnection);
+        println (myPhrase.content);
     }
 
     // void communicate(){

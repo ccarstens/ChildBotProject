@@ -11,7 +11,8 @@ Conversation c = new Conversation(this, "Lea", "conversation_1");
 void setup(){
 
     delay(2000);
-    c.communicate();
+    //c.communicate();
+
 
 }
 
