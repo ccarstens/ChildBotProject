@@ -31,25 +31,6 @@ class DBConnection extends MySQL{
 
     }
 
-    public int[] getResponsePhraseData(String _response){
-        String query = String.format("SELECT * FROM response_phrases WHERE content LIKE '%s'", _response);
-        int[] returnValues;
-        if(this.getResultCount(query) > 0){
-            this.query(query);
-            this.next();
-
-        }else{
-            println("Start updating response_phrase table");
-            this.query("INSERT INTO response_phrases (content) VALUES ('%s')", _response);
-            println("END updating");
-            println("Start Select");
-            this.query("SELECT * FROM response_phrases ORDER BY id DESC LIMIT 1");
-            this.next();
-            println("END SELECT");
-        }
-        return new int[]{this.getInt("id"), this.getInt("meaning_id")};
-    }
-
     public int getResultCount(String _query){
         this.query(_query.replaceAll("SELECT.*FROM", "SELECT COUNT(*) FROM"));
         this.next();

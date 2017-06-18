@@ -25,18 +25,28 @@ class Conversation{
 
         this.userSession = new UserSession(new DBConnection(this.applet));
 
-        this.currentPhrase = new BotPhrase(23, this.logConnection);
-        this.currentPhrase.speak();
+        this.currentPhrase = new BotPhrase(14, this.logConnection);
 
+        ResponsePhrase temp = new ResponsePhrase("hallo lea", this.logConnection);
     }
 
     void communicate(){
         if(this.currentPhrase.speak()){
-            this.human.sendMessage("READY");
+            if(this.currentPhrase.expectsResponse()){
+                this.human.sendMessage("READY");
+            }
+
         }
     }
 
     void onWebSocketMessage(String _message){
+
+
+
+
+
+
+
 
         // //run code for anwer processing
         // int[] responsePhraseData = this.logConnection.getResponsePhraseData(_message);
