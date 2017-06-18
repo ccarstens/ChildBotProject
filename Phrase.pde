@@ -1,9 +1,9 @@
 class Phrase extends TextToSpeech{
 
 
-    int id;
-    String content;
-    DBConnection db;
+    public int id;
+    public String content;
+    protected DBConnection db;
 
 
     Phrase(int _id, DBConnection _db, String _tableName){

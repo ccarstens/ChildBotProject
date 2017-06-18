@@ -1,17 +1,17 @@
 class TextToSpeech {
-    String voice;
-    boolean speechInProgress;
-    
-    TextToSpeech(String voice){
+    public String voice;
+    public boolean speechInProgress;
+
+    public TextToSpeech(String voice){
       this.voice = voice;
       this.speechInProgress = false;
     }
 
-    String getVoice(){
+    public String getVoice(){
       return this.voice;
     }
 
-    void say(String text){
+    public void say(String text){
         try{
             this.speechInProgress = true;
             Runtime r = Runtime.getRuntime();

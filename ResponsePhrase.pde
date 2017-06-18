@@ -1,14 +1,14 @@
 class ResponsePhrase extends Phrase{
 
-    int meaningID;
+    public int meaningID;
 
-    ResponsePhrase(int _id, DBConnection _db){
+    public ResponsePhrase(int _id, DBConnection _db){
         super(_id, _db, "response_phrases");
 
         this.meaningID = this.db.getInt("meaning_id");
     }
 
-    ResponsePhrase(String _content, DBConnection _db){
+    public ResponsePhrase(String _content, DBConnection _db){
         super(1, _db, "response_phrases");
 
         String query = String.format("SELECT * FROM response_phrases WHERE content LIKE '%s'", _content);

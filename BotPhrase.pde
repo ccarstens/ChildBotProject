@@ -1,15 +1,18 @@
 class BotPhrase extends Phrase{
 
-    int catID;
-    boolean isBase;
-    String expectedResponseType;
-    boolean isExit;
-    int nextPhraseTrue;
-    int nextPhraseFalse;
+    public static final String BOOL = "BOOL";
+    public static final String STRING = "STRING";
+
+    public int catID;
+    public boolean isBase;
+    public String expectedResponseType;
+    public boolean isExit;
+    public int nextPhraseTrue;
+    public int nextPhraseFalse;
 
 
 
-    BotPhrase(int _id, DBConnection _db){
+    public BotPhrase(int _id, DBConnection _db){
         super(_id, _db, "general_phrases");
 
 
@@ -21,15 +24,37 @@ class BotPhrase extends Phrase{
         this.nextPhraseFalse = this.db.getInt("follow_up_phrase_id_if_false");
     }
 
-    boolean speak(){
+    public boolean speak(){
         this.say(this.content);
         return true;
     }
 
-    boolean expectsResponse(){
+    public boolean speak(String _response){
+        this.content = this.content.replaceAll("\\$STRING", _response);
+        return this.speak();
+
+    }
+
+    public boolean expectsResponse(){
         if(this.expectedResponseType.length() == 0){
             return false;
         }
         return true;
+    }
+
+    public boolean isBool(){
+        return this.expectedResponseType.equals(BotPhrase.BOOL);
+    }
+
+    public boolean isString(){
+        return this.expectedResponseType.equals(BotPhrase.STRING);
+    }
+
+    public BotPhrase getTrue(){
+        return new BotPhrase(this.nextPhraseTrue, this.db);
+    }
+
+    public BotPhrase getFalse(){
+        return new BotPhrase(this.nextPhraseFalse, this.db);
     }
 }

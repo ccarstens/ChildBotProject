@@ -6,18 +6,19 @@ class Conversation{
     int port;
     String domain;
 
-    DBConnection logConnection;
+    DBConnection db;
 
     UserSession userSession;
 
+    BotPhrase lastPhrase;
     BotPhrase currentPhrase;
 
-    String lastResponse;
+    ResponsePhrase lastResponse;
 
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
 
-        this.logConnection = new DBConnection(this.applet);
+        this.db = new DBConnection(this.applet);
 
 
 
@@ -25,13 +26,25 @@ class Conversation{
 
         this.userSession = new UserSession(new DBConnection(this.applet));
 
-        this.currentPhrase = new BotPhrase(14, this.logConnection);
+        this.currentPhrase = new BotPhrase(14, this.db);
 
-        ResponsePhrase temp = new ResponsePhrase("hallo lea", this.logConnection);
+        ResponsePhrase temp = new ResponsePhrase("hallo lea", this.db);
     }
 
     void communicate(){
-        if(this.currentPhrase.speak()){
+        boolean speakingSuccessful;
+        if(this.lastPhrase != null){
+            println("!= null");
+            if(this.lastPhrase.isString()){
+                println("is string. " + this.lastResponse.content);
+                speakingSuccessful = this.currentPhrase.speak(this.lastResponse.content);
+            }else{
+                speakingSuccessful = this.currentPhrase.speak();
+            }
+        }else{
+            speakingSuccessful = this.currentPhrase.speak();
+        }
+        if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
             }
@@ -40,8 +53,18 @@ class Conversation{
     }
 
     void onWebSocketMessage(String _message){
+        this.lastResponse = new ResponsePhrase(_message, this.db);
 
+        if(currentPhrase.isBool()){
+            println("is bool");
+        }else{
+            println(_message);
+            //is string
+            this.lastPhrase = this.currentPhrase;
+            this.currentPhrase = this.currentPhrase.getTrue();
+            this.communicate();
 
+        }
 
 
 
@@ -49,9 +72,9 @@ class Conversation{
 
 
         // //run code for anwer processing
-        // int[] responsePhraseData = this.logConnection.getResponsePhraseData(_message);
+        // int[] responsePhraseData = this.db.getResponsePhraseData(_message);
         //
-        // this.logConnection.logResponseWithID(this.userSession.id, this.bot.currentPhraseID, responsePhraseData[0]);
+        // this.db.logResponseWithID(this.userSession.id, this.bot.currentPhraseID, responsePhraseData[0]);
         // if(responsePhraseData[1] == DBConnection.MEANING_YES){
         //     println("Die Aussage des Users war bejahend");
         // }else if(responsePhraseData[1] == DBConnection.MEANING_NO){
