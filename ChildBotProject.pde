@@ -7,9 +7,12 @@ import java.util.Date;
 
 Conversation c = new Conversation(this, "Lea", "conversation_1");
 
+BotPhrase bp = new BotPhrase(66, new DBConnection(this));
+
+
 
 void setup(){
-
+println(bp.content);
     delay(2000);
     //c.communicate();
 
