@@ -1,0 +1,3 @@
+class ResponsePhrase extends Phrase{
+
+}
