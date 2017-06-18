@@ -27,7 +27,7 @@ class Conversation{
 
         this.userSession = new UserSession(new DBConnection(this.applet));
 
-        this.currentPhrase = new BotPhrase(82, this.db);
+        this.currentPhrase = new BotPhrase(22, this.db);
 
         ResponsePhrase temp = new ResponsePhrase("hallo lea", this.db);
     }
@@ -37,7 +37,7 @@ class Conversation{
         if(this.lastPhrase != null){
             println("!= null");
             if(this.currentPhrase.containsPlaceholder){
-                speakingSuccessful = this.currentPhrase.speak(this.lastString.content);
+                speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
             }
@@ -47,6 +47,14 @@ class Conversation{
         if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
+            }else{
+                this.lastPhrase = this.currentPhrase;
+                this.currentPhrase = this.lastPhrase.getTrue();
+                if(this.currentPhrase != null){
+                    this.communicate();
+                }else{
+                    println("CALL NEXT PHRASE METHOD");
+                }
             }
 
         }
@@ -55,6 +63,7 @@ class Conversation{
     void onWebSocketMessage(String _message){
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
+        this.logResponse();
         if(currentPhrase.isBool()){
             println("Meaning ID: " + this.lastResponse.meaningID);
             if(this.lastResponse.meansYes()){
@@ -73,7 +82,12 @@ class Conversation{
 
             this.currentPhrase = this.lastPhrase.getTrue();
         }
-        this.communicate();
+        if(this.currentPhrase != null){
+            this.communicate();
+        }else{
+            println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+        }
+
 
 
 
@@ -95,5 +109,9 @@ class Conversation{
         //
         // println("HUMAN: " + _message);
         // this.communicate();
+    }
+
+    public void logResponse(){
+        this.db.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", this.userSession.id, this.lastPhrase.id, this.lastResponse.id);
     }
 }

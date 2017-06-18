@@ -24,13 +24,11 @@ class BotPhrase extends Phrase{
         this.isExit = this.db.getBoolean("is_exit_point");
         this.nextPhraseTrue = this.db.getInt("follow_up_phrase_id_if_true");
         this.nextPhraseFalse = this.db.getInt("follow_up_phrase_id_if_false");
-       
-      
-        this.containsPlaceholder = this.content.indexOf(BotPhrase.PLACEHOLDER) != -1;
-        
 
-        
-        
+
+        this.containsPlaceholder = this.content.indexOf(BotPhrase.PLACEHOLDER) != -1;
+
+
     }
 
     public boolean speak(){
@@ -60,7 +58,11 @@ class BotPhrase extends Phrase{
     }
 
     public BotPhrase getTrue(){
-        return new BotPhrase(this.nextPhraseTrue, this.db);
+        if(this.nextPhraseTrue > 0){
+            return new BotPhrase(this.nextPhraseTrue, this.db);
+        }
+        return null;
+
     }
 
     public BotPhrase getFalse(){
