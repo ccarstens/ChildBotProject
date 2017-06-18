@@ -60,9 +60,10 @@ class Conversation{
         }
     }
 
-    void onWebSocketMessage(String _message){
+    void onResponseFromUser(String _message){
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
+        this.specialActionsOnResponse();
         this.logResponse();
         if(currentPhrase.isBool()){
             println("Meaning ID: " + this.lastResponse.meaningID);
@@ -87,31 +88,13 @@ class Conversation{
         }else{
             println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
         }
-
-
-
-
-
-
-        // //run code for anwer processing
-        // int[] responsePhraseData = this.db.getResponsePhraseData(_message);
-        //
-        // this.db.logResponseWithID(this.userSession.id, this.bot.currentPhraseID, responsePhraseData[0]);
-        // if(responsePhraseData[1] == DBConnection.MEANING_YES){
-        //     println("Die Aussage des Users war bejahend");
-        // }else if(responsePhraseData[1] == DBConnection.MEANING_NO){
-        //     println("Die Aussage des Users war verneinend");
-        // }else{
-        //     println("Die Bedeutung konnte nicht erkannt werden.");
-        // }
-        //
-        //
-        //
-        // println("HUMAN: " + _message);
-        // this.communicate();
     }
 
     public void logResponse(){
         this.db.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", this.userSession.id, this.lastPhrase.id, this.lastResponse.id);
+    }
+
+    public void specialActionsOnResponse(){
+
     }
 }

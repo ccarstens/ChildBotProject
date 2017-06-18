@@ -19,7 +19,7 @@ void draw(){
 }
 
 void webSocketServerEvent(String _message){
-    c.onWebSocketMessage(_message);
+    c.onResponseFromUser(_message);
 }
 
 void exit(){
