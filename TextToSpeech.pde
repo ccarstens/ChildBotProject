@@ -1,6 +1,7 @@
 class TextToSpeech {
     String voice;
     boolean speechInProgress;
+    
     TextToSpeech(String voice){
       this.voice = voice;
       this.speechInProgress = false;
