@@ -36,8 +36,11 @@ class Conversation{
         boolean speakingSuccessful;
         if(this.lastPhrase != null){
             println("!= null");
-            if(this.currentPhrase.containsPlaceholder){
+            if(this.currentPhrase.containsStringPlaceholder){
                 speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
+            }else if(this.currentPhrase.containsUsernamePlaceholder){ 
+                speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
+                   
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
             }
