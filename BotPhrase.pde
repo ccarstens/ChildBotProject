@@ -10,7 +10,7 @@ class BotPhrase extends Phrase{
 
 
     BotPhrase(int _id, DBConnection _db){
-        super(_id, _db);
+        super(_id, _db, "general_phrases");
 
 
         this.catID = this.db.getInt("cat_id");
