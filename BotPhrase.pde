@@ -25,4 +25,11 @@ class BotPhrase extends Phrase{
         this.say(this.content);
         return true;
     }
+
+    boolean expectsResponse(){
+        if(this.expectedResponseType.length() == 0){
+            return false;
+        }
+        return true;
+    }
 }
