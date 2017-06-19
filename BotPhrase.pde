@@ -6,7 +6,7 @@ class BotPhrase extends Phrase{
     public static final String USERNAMEPLACEHOLDER = "$USERNAME";
 
     public int catID;
-    public boolean isBase;
+    public boolean typeID;
     public String expectedResponseType;
     public boolean isExit;
     public int nextPhraseTrue;
@@ -21,7 +21,7 @@ class BotPhrase extends Phrase{
 
 
         this.catID = this.db.getInt("cat_id");
-        this.isBase = this.db.getBoolean("is_base");
+        this.typeID = this.db.getBoolean("type_id");
         this.expectedResponseType = this.db.getString("expected_response_type");
         this.isExit = this.db.getBoolean("is_exit_point");
         this.nextPhraseTrue = this.db.getInt("follow_up_phrase_id_if_true");

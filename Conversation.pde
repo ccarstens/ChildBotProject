@@ -1,5 +1,7 @@
 class Conversation{
 
+    public static final int IDLE_TIMEOUT_1 = 10000;
+
     protected WebsocketServer human;
 
     protected PApplet applet;
@@ -21,6 +23,8 @@ class Conversation{
     protected boolean timeoutActive;
 
 
+
+
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
 
@@ -35,7 +39,7 @@ class Conversation{
         this.terminateTimeout = false;
         this.timeoutActive = false;
 
-        this.currentPhrase = new BotPhrase(14, this.db);
+        this.currentPhrase = new BotPhrase(108, this.db);
 
         this.launchServer();
 
@@ -59,7 +63,7 @@ class Conversation{
         if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
-                //this.setTimeout(5000, "reactToIdleUser");
+                this.setTimeout(5000, "reactToIdleUser");
             }else{
                 this.lastPhrase = this.currentPhrase;
                 this.currentPhrase = this.lastPhrase.getTrue();
@@ -129,31 +133,34 @@ class Conversation{
     }
 
     public void setTimeout(int _millis, String _method){
+        println("setTimeout: " + _millis + " " + _method);
         this.timeoutDuration = _millis;
         this.timeoutMethod = _method;
         this.timeoutStart = millis();
         this.timeoutActive = true;
+        this.terminateTimeout = false;
     }
 
     public void timeoutCallback(){
-
-        if(this.timeoutActive && !this.terminateTimeout){
-            println(millis() - this.timeoutStart);
-            if(millis() - this.timeoutStart >= this.timeoutDuration){
-                println("CALLED REACTTOIDLEUSER");
-                switch(this.timeoutMethod){
-                    case "reactToIdleUser": {
-                        this.reactToIdleUser();
-                        break;
+        if(this.timeoutActive){
+            if(!this.terminateTimeout){
+                println(millis() - this.timeoutStart);
+                if(millis() - this.timeoutStart >= this.timeoutDuration){
+                    this.timeoutActive = false;
+                    println("CALLED REACTTOIDLEUSER");
+                    switch(this.timeoutMethod){
+                        case "reactToIdleUser": {
+                            this.reactToIdleUser();
+                            break;
+                        }
                     }
-
                 }
+            }else{
+                this.terminateTimeout = false;
                 this.timeoutActive = false;
             }
-        }else{
-            this.terminateTimeout = false;
-            this.timeoutActive = false;
         }
+
 
     }
 

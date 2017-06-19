@@ -15,7 +15,7 @@ void setup(){
 }
 
 void draw(){
-    //c.timeoutCallback();
+    c.timeoutCallback();
 }
 
 void webSocketServerEvent(String _message){
