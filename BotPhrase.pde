@@ -39,7 +39,7 @@ class BotPhrase extends Phrase{
     }
 
     public boolean speak(String _response){
-        this.content = this.content.replaceAll("\\$STRING", _response);
+        this.content = this.content.replaceAll("(\\" + BotPhrase.STRINGPLACEHOLDER + "|\\" + BotPhrase.USERNAMEPLACEHOLDER + ")", _response);
         return this.speak();
 
     }

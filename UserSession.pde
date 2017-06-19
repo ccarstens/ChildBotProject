@@ -15,7 +15,7 @@ class UserSession{
 
     public void close(){
         if(this.sessionOpen){
-            this.db.query("UPDATE user_sessions SET userName = '%s' WHERE id = %s", this.userName, this.id);
+            this.db.query("UPDATE user_sessions SET user_name = '%s' WHERE id = %s", this.userName, this.id);
             this.sessionOpen = false;
         }
 

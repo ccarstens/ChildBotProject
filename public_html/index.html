@@ -23,6 +23,8 @@
             console.log("yes");
             if(e.data == "READY"){
                 recognition.start();
+            }else if(e.data == "ABORT"){
+                recognition.stop();
             }
         }
 

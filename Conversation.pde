@@ -1,20 +1,28 @@
-class Conversation{
+class Conversation implements Runnable{
 
-    WebsocketServer human;
+    protected WebsocketServer human;
 
-    PApplet applet;
-    int port;
-    String domain;
+    protected PApplet applet;
+    protected int port;
+    protected String domain;
 
-    DBConnection db;
+    protected DBConnection db;
 
     UserSession userSession;
 
-    BotPhrase lastPhrase;
-    BotPhrase currentPhrase;
+    protected BotPhrase lastPhrase;
+    protected BotPhrase currentPhrase;
+    protected BotPhrase currentInformingPhrase;
 
-    ResponsePhrase lastResponse;
-    ResponsePhrase lastStringResponse;
+    protected ResponsePhrase lastResponse;
+    protected ResponsePhrase lastStringResponse;
+
+    protected String timeoutMethod;
+    protected int timeoutMillis;
+
+    volatile boolean terminateTimeout;
+
+
 
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
@@ -29,18 +37,21 @@ class Conversation{
 
         this.currentPhrase = new BotPhrase(14, this.db);
 
+        this.terminateTimeout = false;
+
         ResponsePhrase temp = new ResponsePhrase("hallo lea", this.db);
+
     }
 
     void communicate(){
+        println("Communicate in Thread : " + Thread.currentThread().getId());
         boolean speakingSuccessful;
         if(this.lastPhrase != null){
-            println("!= null");
             if(this.currentPhrase.containsStringPlaceholder){
                 speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
-            }else if(this.currentPhrase.containsUsernamePlaceholder){ 
+            }else if(this.currentPhrase.containsUsernamePlaceholder){
                 speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
-                   
+
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
             }
@@ -50,6 +61,7 @@ class Conversation{
         if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
+                this.setTimeout(5000, "reactToIdleUser");
             }else{
                 this.lastPhrase = this.currentPhrase;
                 this.currentPhrase = this.lastPhrase.getTrue();
@@ -64,9 +76,10 @@ class Conversation{
     }
 
     void onResponseFromUser(String _message){
+        terminateTimeout = true;
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
-        this.specialActionsOnResponse();
+
         this.logResponse();
         if(currentPhrase.isBool()){
             println("Meaning ID: " + this.lastResponse.meaningID);
@@ -87,6 +100,7 @@ class Conversation{
             this.currentPhrase = this.lastPhrase.getTrue();
         }
         if(this.currentPhrase != null){
+            this.specialActionsOnResponse();
             this.communicate();
         }else{
             println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
@@ -101,9 +115,43 @@ class Conversation{
         if(this.lastPhrase != null){
             if(this.lastPhrase.id == 15){
                 String tempUserName = this.lastStringResponse.content.replaceAll("(?i)\\b(ich|bin|ist|heiße|mein|name|hallo|hi|nennt|man|mich|kennt|als|der|die|leute|nennen| )\\b", "");
+                println(tempUserName);
                 this.userSession.userName = tempUserName;
             }
         }
 
     }
+
+    public void reactToIdleUser(){
+        this.human.sendMessage("ABORT");
+        this.currentInformingPhrase = new BotPhrase(100, this.db);
+        println("Before speaking informing message");
+        this.currentInformingPhrase.speak();
+        this.communicate();
+    }
+
+    public void setTimeout(int _millis, String _method){
+        this.timeoutMillis = _millis;
+        this.timeoutMethod = _method;
+        (new Thread(this)).start();
+    }
+
+    public void run(){
+        println(Thread.currentThread().getId());
+        print("Waiting for " + this.timeoutMillis + " milliseconds");
+        delay(this.timeoutMillis);
+        println("Before !terminateTimout");
+        if(!terminateTimeout){
+            switch(this.timeoutMethod){
+                case "reactToIdleUser": {
+                    this.reactToIdleUser();
+                    break;
+                }
+
+            }
+        }
+        this.terminateTimeout = false;
+
+    }
+
 }

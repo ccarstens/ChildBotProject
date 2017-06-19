@@ -1,6 +1,7 @@
 import de.bezier.data.sql.*;
 import websockets.*;
 import java.util.Date;
+import java.lang.*;
 
 
 
@@ -8,10 +9,9 @@ import java.util.Date;
 Conversation c = new Conversation(this, "Lea", "conversation_1");
 
 void setup(){
+    println(Thread.currentThread().getId());
     delay(2000);
     c.communicate();
-
-
 }
 
 void draw(){
