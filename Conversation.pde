@@ -18,6 +18,7 @@ class Conversation{
     protected int timeoutDuration;
     protected long timeoutStart;
     protected boolean terminateTimeout;
+    protected boolean timeoutActive;
 
 
     Conversation(PApplet _applet, String _voice,  String _table){
@@ -32,6 +33,7 @@ class Conversation{
         this.userSession = new UserSession(new DBConnection(this.applet));
 
         this.terminateTimeout = false;
+        this.timeoutActive = false;
 
         this.currentPhrase = new BotPhrase(14, this.db);
 
@@ -57,7 +59,7 @@ class Conversation{
         if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
-                this.setTimeout(5000, "reactToIdleUser");
+                //this.setTimeout(5000, "reactToIdleUser");
             }else{
                 this.lastPhrase = this.currentPhrase;
                 this.currentPhrase = this.lastPhrase.getTrue();
@@ -130,11 +132,12 @@ class Conversation{
         this.timeoutDuration = _millis;
         this.timeoutMethod = _method;
         this.timeoutStart = millis();
+        this.timeoutActive = true;
     }
 
     public void timeoutCallback(){
 
-        if(!terminateTimeout){
+        if(this.timeoutActive && !this.terminateTimeout){
             println(millis() - this.timeoutStart);
             if(millis() - this.timeoutStart >= this.timeoutDuration){
                 println("CALLED REACTTOIDLEUSER");
@@ -145,9 +148,11 @@ class Conversation{
                     }
 
                 }
+                this.timeoutActive = false;
             }
         }else{
             this.terminateTimeout = false;
+            this.timeoutActive = false;
         }
 
     }
