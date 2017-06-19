@@ -9,7 +9,6 @@ import java.lang.*;
 Conversation c = new Conversation(this, "Lea", "conversation_1");
 
 void setup(){
-    println(Thread.currentThread().getId());
     delay(2000);
     c.communicate();
 }

@@ -12,7 +12,7 @@ class Conversation{
 
     UserSession userSession;
 
-    protected BotPhrase lastPhrase, currentPhrase, currentInformingPhrase;
+    protected BotPhrase lastPhrase, currentPhrase, lastPhraseIdleUser;
 
     protected ResponsePhrase lastResponse, lastStringResponse;
 
@@ -147,7 +147,6 @@ class Conversation{
                 println(millis() - this.timeoutStart);
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
-                    println("CALLED REACTTOIDLEUSER");
                     switch(this.timeoutMethod){
                         case "reactToIdleUser": {
                             this.reactToIdleUser();
@@ -160,8 +159,6 @@ class Conversation{
                 this.timeoutActive = false;
             }
         }
-
-
     }
 
     protected boolean launchServer(){
