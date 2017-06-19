@@ -20,7 +20,7 @@
         recognition.continuous = true;
 
         ws.onmessage = function(e){
-            console.log("yes");
+            console.log(e.data);
             if(e.data == "READY"){
                 recognition.start();
             }else if(e.data == "ABORT"){

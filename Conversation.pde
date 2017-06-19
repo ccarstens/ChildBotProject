@@ -72,7 +72,7 @@ class Conversation{
     }
 
     void onResponseFromUser(String _message){
-        terminateTimeout = true;
+        this.terminateTimeout = true;
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
 
@@ -135,7 +135,9 @@ class Conversation{
     public void timeoutCallback(){
 
         if(!terminateTimeout){
+            println(millis() - this.timeoutStart);
             if(millis() - this.timeoutStart >= this.timeoutDuration){
+                println("CALLED REACTTOIDLEUSER");
                 switch(this.timeoutMethod){
                     case "reactToIdleUser": {
                         this.reactToIdleUser();
