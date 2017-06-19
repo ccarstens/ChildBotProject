@@ -151,7 +151,7 @@ class Conversation{
     }
 
     protected boolean launchServer(){
-        ShellCommand.exec("cd /Users/cornelius/Documents/Processing/ChildBotProject/ && node fileserver.js");
+        launch("/Applications/Google Chrome.app");
         return true;
     }
 
