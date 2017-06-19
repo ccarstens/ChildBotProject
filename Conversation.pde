@@ -1,4 +1,4 @@
-class Conversation implements Runnable{
+class Conversation{
 
     protected WebsocketServer human;
 
@@ -10,18 +10,14 @@ class Conversation implements Runnable{
 
     UserSession userSession;
 
-    protected BotPhrase lastPhrase;
-    protected BotPhrase currentPhrase;
-    protected BotPhrase currentInformingPhrase;
+    protected BotPhrase lastPhrase, currentPhrase, currentInformingPhrase;
 
-    protected ResponsePhrase lastResponse;
-    protected ResponsePhrase lastStringResponse;
+    protected ResponsePhrase lastResponse, lastStringResponse;
 
     protected String timeoutMethod;
-    protected int timeoutMillis;
-
-    volatile boolean terminateTimeout;
-
+    protected int timeoutDuration;
+    protected long timeoutStart;
+    protected boolean terminateTimeout;
 
 
     Conversation(PApplet _applet, String _voice,  String _table){
@@ -35,11 +31,11 @@ class Conversation implements Runnable{
 
         this.userSession = new UserSession(new DBConnection(this.applet));
 
-        this.currentPhrase = new BotPhrase(14, this.db);
-
         this.terminateTimeout = false;
 
-        ResponsePhrase temp = new ResponsePhrase("hallo lea", this.db);
+        this.currentPhrase = new BotPhrase(14, this.db);
+
+        this.launchServer();
 
     }
 
@@ -131,27 +127,32 @@ class Conversation implements Runnable{
     }
 
     public void setTimeout(int _millis, String _method){
-        this.timeoutMillis = _millis;
+        this.timeoutDuration = _millis;
         this.timeoutMethod = _method;
-        (new Thread(this)).start();
+        this.timeoutStart = millis();
     }
 
-    public void run(){
-        println(Thread.currentThread().getId());
-        print("Waiting for " + this.timeoutMillis + " milliseconds");
-        delay(this.timeoutMillis);
-        println("Before !terminateTimout");
+    public void timeoutCallback(){
+
         if(!terminateTimeout){
-            switch(this.timeoutMethod){
-                case "reactToIdleUser": {
-                    this.reactToIdleUser();
-                    break;
+            if(millis() - this.timeoutStart >= this.timeoutDuration){
+                switch(this.timeoutMethod){
+                    case "reactToIdleUser": {
+                        this.reactToIdleUser();
+                        break;
+                    }
+
                 }
-
             }
+        }else{
+            this.terminateTimeout = false;
         }
-        this.terminateTimeout = false;
 
+    }
+
+    protected boolean launchServer(){
+        ShellCommand.exec("cd /Users/cornelius/Documents/Processing/ChildBotProject/ && node fileserver.js");
+        return true;
     }
 
 }
