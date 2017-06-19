@@ -1,4 +1,4 @@
-class Phrase extends TextToSpeech{
+public class Phrase extends TextToSpeech{
 
 
     public int id;

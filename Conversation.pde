@@ -92,6 +92,7 @@ class Conversation{
                 println("means no");
                 this.currentPhrase = this.lastPhrase.getFalse();
             }else{
+                this.currentPhrase = BotPhrase.getRandom(this.db);
                 println("iche everstehe nichte");
             }
         }else{
