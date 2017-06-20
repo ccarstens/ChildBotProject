@@ -1,9 +1,15 @@
-class BotPhrase extends Phrase{
+public class BotPhrase extends Phrase{
 
     public static final String BOOL = "BOOL";
     public static final String STRING = "STRING";
     public static final String STRINGPLACEHOLDER = "$STRING";
     public static final String USERNAMEPLACEHOLDER = "$USERNAME";
+
+    public static final int TYPE_START = 1;
+    public static final int TYPE_CONVERSATION = 2;
+    public static final int TYPE_LEAVE = 3;
+    public static final int TYPE_IDLE_USER = 4;
+    public static final int TYPE_EVAL_MEANING = 5;
 
     public int catID;
     public boolean typeID;
@@ -69,5 +75,11 @@ class BotPhrase extends Phrase{
 
     public BotPhrase getFalse(){
         return new BotPhrase(this.nextPhraseFalse, this.db);
+    }
+
+    public BotPhrase getRandomPhraseByType(int _type_id){
+        this.db.query("SELECT id FROM general_phrases WHERE type_id = %s", _type_id);
+        this.db.next();
+        return new BotPhrase(this.db.getInt("id"), this.db);
     }
 }
