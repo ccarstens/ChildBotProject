@@ -25,7 +25,7 @@ class Conversation{
     public boolean inIdleUserMode;
     protected int idleUserModeInterations;
 
-    public boolean inMeaningEvaluationMode();
+    public boolean inMeaningEvaluationMode;
 
 
     Conversation(PApplet _applet, String _voice,  String _table){
@@ -45,7 +45,7 @@ class Conversation{
         this.inIdleUserMode = false;
         this.idleUserModeInterations = 0;
 
-        this.currentPhrase = new BotPhrase(108, this.db);
+        this.currentPhrase = new BotPhrase(14, this.db);
 
         this.launchServer();
 
@@ -56,9 +56,20 @@ class Conversation{
         boolean speakingSuccessful;
         if(this.lastPhrase != null){
             if(this.currentPhrase.containsStringPlaceholder){
-                speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
+
+                if(this.inMeaningEvaluationMode){
+                    speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.content);
+                }else{
+                    speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
+                }
+
             }else if(this.currentPhrase.containsUsernamePlaceholder){
-                speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
+                if(this.userSession.userName != null){
+                    speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
+                }else{
+                    this.currentPhrase.content = this.currentPhrase.content.replaceAll("\\" + BotPhrase.USERNAMEPLACEHOLDER, "");
+                    speakingSuccessful = this.currentPhrase.speak();
+                }
 
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
@@ -70,17 +81,22 @@ class Conversation{
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
                 if(this.timeoutActive){
-                    println("NOOOOOOO");
+                    println("There is a timeout active but a new one will be set now");
                 }
                 this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
             }else{
-                this.lastPhrase = this.currentPhrase;
-                this.currentPhrase = this.lastPhrase.getTrue();
-                if(this.currentPhrase != null){
-                    this.communicate();
+                if(this.inMeaningEvaluationMode){
+                    this.leaveMeaningEvaluationMode();
                 }else{
-                    println("CALL NEXT PHRASE METHOD");
+                    this.lastPhrase = this.currentPhrase;
+                    this.currentPhrase = this.lastPhrase.getTrue();
+                    if(this.currentPhrase != null){
+                        this.communicate();
+                    }else{
+                        println("CALL NEXT PHRASE METHOD");
+                    }
                 }
+
             }
 
         }
@@ -91,6 +107,8 @@ class Conversation{
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
 
+        boolean meaningEvalStateOnEntry = this.inMeaningEvaluationMode;
+
         this.logResponse();
 
         if(this.inIdleUserMode){
@@ -100,12 +118,30 @@ class Conversation{
                 println("Meaning ID: " + this.lastResponse.meaningID);
                 if(this.lastResponse.meansYes()){
                     println("means yes");
+
+                    if(this.inMeaningEvaluationMode){
+                        this.lastResponseStorage.setMeaningYes();
+                        this.leaveMeaningEvaluationMode();
+                    }
+
                     this.currentPhrase = this.lastPhrase.getTrue();
                 }else if(this.lastResponse.meansNo()){
                     println("means no");
+
+                    if(this.inMeaningEvaluationMode){
+                        this.lastResponseStorage.setMeaningNo();
+                        this.leaveMeaningEvaluationMode();
+                    }
+
                     this.currentPhrase = this.lastPhrase.getFalse();
                 }else{
-                    println("iche everstehe nichte");
+                    println("ANSWER NOT UNDERSTOOD");
+
+                    if(!this.inMeaningEvaluationMode){
+                        this.meaningEvaluation();
+                    }else{
+                        println("HANDLE NEXT PHRASE WHEN EVALUATION FAILED");
+                    }
                 }
             }else{
                 this.lastStringResponse = this.lastResponse;
@@ -114,11 +150,13 @@ class Conversation{
 
                 this.currentPhrase = this.lastPhrase.getTrue();
             }
-            if(this.currentPhrase != null){
-                this.specialActionsOnResponse();
-                this.communicate();
-            }else{
-                println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+            if(meaningEvalStateOnEntry || !this.inMeaningEvaluationMode){
+                if(this.currentPhrase != null){
+                    this.specialActionsOnResponse();
+                    this.communicate();
+                }else{
+                    println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+                }
             }
         }
 
@@ -208,6 +246,22 @@ class Conversation{
         if(!this.inMeaningEvaluationMode){
             this.inMeaningEvaluationMode = true;
             this.storePhrasesForModeChange();
+        }
+    }
+
+    protected void leaveMeaningEvaluationMode(){
+        if(this.inMeaningEvaluationMode && this.currentPhrase.isExit){
+            this.inMeaningEvaluationMode = false;
+
+            if(this.lastResponse.meansYes()){
+                this.currentPhraseStorage = this.currentPhraseStorage.getTrue();
+            }else if(this.lastResponse.meansNo()){
+                this.currentPhraseStorage = this.currentPhraseStorage.getFalse();
+            }
+
+            this.loadPhrasesAfterModeChange();
+            this.terminateTimeout = true;
+            this.communicate();
         }
     }
 

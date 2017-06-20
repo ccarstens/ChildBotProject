@@ -35,4 +35,14 @@ class ResponsePhrase extends Phrase{
     public boolean meansNo(){
         return this.meaningID == ResponsePhrase.MEANING_NO;
     }
+
+    public void setMeaningYes(){
+        this.meaningID = ResponsePhrase.MEANING_YES;
+        this.db.query("UPDATE response_phrases SET meaning_id = %s WHERE id = %s", this.meaningID, this.id);
+    }
+
+    public void setMeaningNo(){
+        this.meaningID = ResponsePhrase.MEANING_NO;
+        this.db.query("UPDATE response_phrases SET meaning_id = %s WHERE id = %s", this.meaningID, this.id);
+    }
 }
