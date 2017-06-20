@@ -12,9 +12,9 @@ class Conversation{
 
     UserSession userSession;
 
-    protected BotPhrase lastPhrase, currentPhrase, lastPhraseIdleUser;
+    protected BotPhrase lastPhrase, currentPhrase, lastPhraseStorage, currentPhraseStorage;
 
-    protected ResponsePhrase lastResponse, lastStringResponse;
+    protected ResponsePhrase lastResponse, lastStringResponse, lastResponseStorage, lastStringResponseStorage;
 
     protected String timeoutMethod;
     protected int timeoutDuration;
@@ -22,7 +22,10 @@ class Conversation{
     protected boolean terminateTimeout;
     protected boolean timeoutActive;
 
+    public boolean inIdleUserMode;
+    protected int idleUserModeInterations;
 
+    public boolean inMeaningEvaluationMode();
 
 
     Conversation(PApplet _applet, String _voice,  String _table){
@@ -38,6 +41,9 @@ class Conversation{
 
         this.terminateTimeout = false;
         this.timeoutActive = false;
+
+        this.inIdleUserMode = false;
+        this.idleUserModeInterations = 0;
 
         this.currentPhrase = new BotPhrase(108, this.db);
 
@@ -63,7 +69,10 @@ class Conversation{
         if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
-                this.setTimeout(5000, "reactToIdleUser");
+                if(this.timeoutActive){
+                    println("NOOOOOOO");
+                }
+                this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
             }else{
                 this.lastPhrase = this.currentPhrase;
                 this.currentPhrase = this.lastPhrase.getTrue();
@@ -83,31 +92,36 @@ class Conversation{
         this.lastPhrase = this.currentPhrase;
 
         this.logResponse();
-        if(currentPhrase.isBool()){
-            println("Meaning ID: " + this.lastResponse.meaningID);
-            if(this.lastResponse.meansYes()){
-                println("means yes");
-                this.currentPhrase = this.lastPhrase.getTrue();
-            }else if(this.lastResponse.meansNo()){
-                println("means no");
-                this.currentPhrase = this.lastPhrase.getFalse();
-            }else{
-                this.currentPhrase = BotPhrase.getRandom(this.db);
-                println("iche everstehe nichte");
-            }
-        }else{
-            this.lastStringResponse = this.lastResponse;
-            println(_message);
-            //is string
 
-            this.currentPhrase = this.lastPhrase.getTrue();
-        }
-        if(this.currentPhrase != null){
-            this.specialActionsOnResponse();
-            this.communicate();
+        if(this.inIdleUserMode){
+            this.leaveIdleUserMode();
         }else{
-            println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+            if(currentPhrase.isBool()){
+                println("Meaning ID: " + this.lastResponse.meaningID);
+                if(this.lastResponse.meansYes()){
+                    println("means yes");
+                    this.currentPhrase = this.lastPhrase.getTrue();
+                }else if(this.lastResponse.meansNo()){
+                    println("means no");
+                    this.currentPhrase = this.lastPhrase.getFalse();
+                }else{
+                    println("iche everstehe nichte");
+                }
+            }else{
+                this.lastStringResponse = this.lastResponse;
+                println(_message);
+                //is string
+
+                this.currentPhrase = this.lastPhrase.getTrue();
+            }
+            if(this.currentPhrase != null){
+                this.specialActionsOnResponse();
+                this.communicate();
+            }else{
+                println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+            }
         }
+
     }
 
     public void logResponse(){
@@ -123,14 +137,6 @@ class Conversation{
             }
         }
 
-    }
-
-    public void reactToIdleUser(){
-        this.human.sendMessage("ABORT");
-        this.currentInformingPhrase = new BotPhrase(100, this.db);
-        println("Before speaking informing message");
-        this.currentInformingPhrase.speak();
-        this.communicate();
     }
 
     public void setTimeout(int _millis, String _method){
@@ -149,8 +155,8 @@ class Conversation{
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
                     switch(this.timeoutMethod){
-                        case "reactToIdleUser": {
-                            this.reactToIdleUser();
+                        case "idleUser": {
+                            this.idleUser();
                             break;
                         }
                     }
@@ -166,5 +172,70 @@ class Conversation{
         launch("/Applications/Google Chrome.app");
         return true;
     }
+
+    protected void enterIdleUserMode(){
+        if(!this.inIdleUserMode){
+            this.inIdleUserMode = true;
+            this.storePhrasesForModeChange();
+        }
+    }
+
+    protected void leaveIdleUserMode(){
+        if(this.inIdleUserMode){
+            println("leaving idle user mode");
+            this.human.sendMessage("ABORT");
+            this.inIdleUserMode = false;
+            this.terminateTimeout = true;
+            this.loadPhrasesAfterModeChange();
+            this.communicate();
+        }
+
+    }
+
+    protected void idleUser(){
+        this.enterIdleUserMode();
+        this.human.sendMessage("ABORT");
+        if(this.currentPhrase == null){
+            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER);
+        }else{
+            this.currentPhrase = this.currentPhrase.getTrue();
+        }
+
+        this.communicate();
+    }
+
+    protected void enterMeaningEvaluationMode(){
+        if(!this.inMeaningEvaluationMode){
+            this.inMeaningEvaluationMode = true;
+            this.storePhrasesForModeChange();
+        }
+    }
+
+    protected void meaningEvaluation(){
+        this.enterMeaningEvaluationMode();
+        if(this.currentPhrase == null){
+            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING);
+        }else{
+            this.currentPhrase = this.currentPhrase.getTrue();
+        }
+        this.communicate();
+    }
+
+    protected void storePhrasesForModeChange(){
+        this.lastPhraseStorage = this.lastPhrase;
+        this.currentPhraseStorage = this.currentPhrase;
+        this.lastResponseStorage = this.lastResponse;
+        this.lastStringResponseStorage = this.lastStringResponse;
+        this.currentPhrase = null;
+    }
+
+    protected void loadPhrasesAfterModeChange(){
+        this.lastPhrase = this.lastPhraseStorage;
+        this.currentPhrase = this.currentPhraseStorage;
+        this.lastResponse = this.lastResponseStorage;
+        this.lastStringResponse = this.lastStringResponseStorage;
+    }
+
+
 
 }
