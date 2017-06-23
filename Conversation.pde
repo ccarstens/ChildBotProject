@@ -1,6 +1,6 @@
 class Conversation{
 
-    public static final int IDLE_TIMEOUT_1 = 10000;
+    public static final int IDLE_TIMEOUT_1 = 5000;
 
     protected WebsocketServer human;
 
@@ -12,9 +12,14 @@ class Conversation{
 
     UserSession userSession;
 
-    protected BotPhrase lastPhrase, currentPhrase, lastPhraseStorage, currentPhraseStorage;
+    protected BotPhrase lastPhrase, currentPhrase;
+    protected ArrayList<BotPhrase> lastPhraseStorage = new ArrayList<BotPhrase>();
+    protected ArrayList<BotPhrase> currentPhraseStorage = new ArrayList<BotPhrase>();
 
-    protected ResponsePhrase lastResponse, lastStringResponse, lastResponseStorage, lastStringResponseStorage;
+    protected ResponsePhrase lastResponse, lastStringResponse;
+    protected ArrayList<ResponsePhrase> lastResponseStorage = new ArrayList<ResponsePhrase>();
+    protected ArrayList<ResponsePhrase> lastStringResponseStorage = new ArrayList<ResponsePhrase>();
+    protected ArrayList<String> modeStack = new ArrayList<String>();
 
     protected String timeoutMethod;
     protected int timeoutDuration;
@@ -59,11 +64,11 @@ class Conversation{
         if(this.lastPhrase != null){
             if(this.currentPhrase.containsStringPlaceholder){
 
-                if(this.inMeaningEvaluationMode){
-                    speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.content);
-                }else{
+                // if(this.inMeaningEvaluationMode){
+                    // speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.content);
+                // }else{
                     speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
-                }
+                // }
 
             }else if(this.currentPhrase.containsUsernamePlaceholder){
                 if(this.userSession.userName != null){
@@ -99,7 +104,11 @@ class Conversation{
             }else{
                 if(this.inMeaningEvaluationMode){
                     this.leaveMeaningEvaluationMode();
+                }else if(this.inIdleUserMode){
+                    println("LEAVE");
                 }else{
+
+
                     this.lastPhrase = this.currentPhrase;
                     this.currentPhrase = this.lastPhrase.getTrue();
                     if(this.currentPhrase != null){
@@ -116,6 +125,7 @@ class Conversation{
     }
 
     void onResponseFromUser(String _message){
+        println("received message " + _message);
         this.terminateTimeout = true;
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
@@ -132,19 +142,19 @@ class Conversation{
                 if(this.lastResponse.meansYes()){
                     println("means yes");
 
-                    if(this.inMeaningEvaluationMode){
-                        this.lastResponseStorage.setMeaningYes();
-                        this.leaveMeaningEvaluationMode();
-                    }
+                    // if(this.inMeaningEvaluationMode){
+                    //     this.lastResponseStorage.setMeaningYes();
+                    //     this.leaveMeaningEvaluationMode();
+                    // }
 
                     this.currentPhrase = this.lastPhrase.getTrue();
                 }else if(this.lastResponse.meansNo()){
                     println("means no");
 
-                    if(this.inMeaningEvaluationMode){
-                        this.lastResponseStorage.setMeaningNo();
-                        this.leaveMeaningEvaluationMode();
-                    }
+                    // if(this.inMeaningEvaluationMode){
+                    //     this.lastResponseStorage.setMeaningNo();
+                    //     this.leaveMeaningEvaluationMode();
+                    // }
 
                     this.currentPhrase = this.lastPhrase.getFalse();
                 }else{
@@ -202,12 +212,12 @@ class Conversation{
     public void timeoutCallback(){
         if(this.timeoutActive){
             if(!this.terminateTimeout){
-                println(millis() - this.timeoutStart);
+                // println(millis() - this.timeoutStart);
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
                     switch(this.timeoutMethod){
                         case "idleUser": {
-                            this.idleUser();
+                            this.enterIdleUserMode();
                             break;
                         }
                     }
@@ -226,8 +236,12 @@ class Conversation{
 
     protected void enterIdleUserMode(){
         if(!this.inIdleUserMode){
+            println("enter IdleUser Mode");
             this.inIdleUserMode = true;
-            this.storePhrasesForModeChange();
+            this.storePhrasesForModeChange("idleUser");
+            this.idleUser();
+        }else{
+            this.idleUser();
         }
     }
 
@@ -244,63 +258,126 @@ class Conversation{
     }
 
     protected void idleUser(){
-        this.enterIdleUserMode();
+        for(BotPhrase p : this.currentPhraseStorage){
+            print(p.id + " " + p.content);
+        }
+        print("\n");
+
         this.human.sendMessage("ABORT");
-        if(this.currentPhrase == null){
-            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
-        }else{
+        if(this.currentPhrase == null){//first
+            this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
+            this.communicate();
+        }else{//follow up
             this.currentPhrase = this.currentPhrase.getTrue();
+            this.communicate();
         }
 
-        this.communicate();
+
+
+
     }
 
     protected void enterMeaningEvaluationMode(){
         if(!this.inMeaningEvaluationMode){
             this.inMeaningEvaluationMode = true;
-            this.storePhrasesForModeChange();
+            this.storePhrasesForModeChange("meaningEvaluation");
         }
     }
 
     protected void leaveMeaningEvaluationMode(){
-        if(this.inMeaningEvaluationMode && this.currentPhrase.isExit){
-            this.inMeaningEvaluationMode = false;
-
-            if(this.lastResponse.meansYes()){
-                this.currentPhraseStorage = this.currentPhraseStorage.getTrue();
-            }else if(this.lastResponse.meansNo()){
-                this.currentPhraseStorage = this.currentPhraseStorage.getFalse();
-            }
-
-            this.loadPhrasesAfterModeChange();
-            this.terminateTimeout = true;
-            this.communicate();
-        }
+        // if(this.inMeaningEvaluationMode && this.currentPhrase.isExit){
+        //     this.inMeaningEvaluationMode = false;
+        //
+        //     if(this.lastResponse.meansYes()){
+        //         this.currentPhraseStorage = this.currentPhraseStorage.getTrue();
+        //     }else if(this.lastResponse.meansNo()){
+        //         this.currentPhraseStorage = this.currentPhraseStorage.getFalse();
+        //     }
+        //
+        //     this.loadPhrasesAfterModeChange();
+        //     this.terminateTimeout = true;
+        //     this.communicate();
+        // }
     }
 
     protected void meaningEvaluation(){
-        this.enterMeaningEvaluationMode();
-        if(this.currentPhrase == null){
-            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING, this.spokenSequences);
-        }else{
-            this.currentPhrase = this.currentPhrase.getTrue();
-        }
-        this.communicate();
+        // this.enterMeaningEvaluationMode();
+        // if(this.currentPhrase == null){
+        //     this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING, this.spokenSequences);
+        // }else{
+        //     this.currentPhrase = this.currentPhrase.getTrue();
+        // }
+        // this.communicate();
     }
 
-    protected void storePhrasesForModeChange(){
-        this.lastPhraseStorage = this.lastPhrase;
-        this.currentPhraseStorage = this.currentPhrase;
-        this.lastResponseStorage = this.lastResponse;
-        this.lastStringResponseStorage = this.lastStringResponse;
+    protected void storePhrasesForModeChange(String _mode){
+        this.lastPhraseStorage.add(this.lastPhrase);
+        this.currentPhraseStorage.add(this.currentPhrase);
+        this.lastResponseStorage.add(this.lastResponse);
+        this.lastStringResponseStorage.add(this.lastStringResponse);
+
+        this.modeStack.add(_mode);
         this.currentPhrase = null;
+        println(this.lastPhraseStorage);
+
+        // this.lastPhraseStorage = this.lastPhrase;
+        // this.currentPhraseStorage = this.currentPhrase;
+        // this.lastResponseStorage = this.lastResponse;
+        // this.lastStringResponseStorage = this.lastStringResponse;
+        // this.currentPhrase = null;
     }
 
     protected void loadPhrasesAfterModeChange(){
-        this.lastPhrase = this.lastPhraseStorage;
-        this.currentPhrase = this.currentPhraseStorage;
-        this.lastResponse = this.lastResponseStorage;
-        this.lastStringResponse = this.lastStringResponseStorage;
+        if(this.lastPhraseStorage.size() > 0){
+
+            this.lastPhrase = this.lastPhraseStorage.get(this.lastPhraseStorage.size() - 1);
+            this.lastPhraseStorage.remove(this.lastPhraseStorage.size() - 1);
+        }else{
+            this.lastPhrase = null;
+        }
+
+        if(this.currentPhraseStorage.size() > 0){
+            println("bigger than zero");
+
+            this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1);
+            this.currentPhraseStorage.remove(this.currentPhraseStorage.size() - 1);
+        }else{
+            this.currentPhrase = null;
+        }
+
+        if(this.lastResponseStorage.size() > 0){
+            this.lastResponse = this.lastResponseStorage.get(this.lastResponseStorage.size() - 1);
+            this.lastResponseStorage.remove(this.lastResponseStorage.size() - 1);
+        }else{
+            this.lastResponse = null;
+        }
+
+        if(this.lastStringResponseStorage.size() > 0){
+            this.lastStringResponse = this.lastStringResponseStorage.get(this.lastStringResponseStorage.size() - 1);
+            this.lastStringResponseStorage.remove(this.lastStringResponseStorage.size() - 1);
+        }else{
+            this.lastStringResponse = null;
+        }
+
+        if(this.modeStack.size() > 0){
+            this.modeStack.remove(this.modeStack.size() - 1);
+            if(this.modeStack.size() > 0){
+                String mode = this.modeStack.get(this.modeStack.size() - 1);
+                println("ENTER NEW MODE" + mode);
+
+            }else{
+                println("back to normal");
+            }
+
+        }else{
+            println("no mode");
+        }
+
+
+        // this.lastPhrase = this.lastPhraseStorage;
+        // this.currentPhrase = this.currentPhraseStorage;
+        // this.lastResponse = this.lastResponseStorage;
+        // this.lastStringResponse = this.lastStringResponseStorage;
     }
 
 
