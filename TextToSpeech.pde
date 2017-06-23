@@ -24,4 +24,18 @@ class TextToSpeech {
             println("InterruptedException");
         }
     }
+
+    public void sayWaitFor(String text){
+        try{
+            this.speechInProgress = true;
+            Runtime r = Runtime.getRuntime();
+            Process p = r.exec("say -v  " + this.voice + " " + text);
+            p.waitFor();
+            this.speechInProgress = false;
+        }catch(IOException e){
+            println("IOException");
+        }catch(InterruptedException e){
+            println("InterruptedException");
+        }
+    }
 }

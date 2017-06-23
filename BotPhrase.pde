@@ -19,6 +19,7 @@ public class BotPhrase extends Phrase{
     public int nextPhraseFalse;
     public boolean containsStringPlaceholder;
     public boolean containsUsernamePlaceholder;
+    public int duration;
 
 
 
@@ -82,4 +83,13 @@ public class BotPhrase extends Phrase{
         this.db.next();
         return new BotPhrase(this.db.getInt("id"), this.db);
     }
+
+    public void callibrateDuration(){
+        int s = millis();
+        this.sayWaitFor(this.content);
+        this.duration = millis() - s;
+        this.db.query("UPDATE general_phrases SET duration = %s WHERE id = %s", this.duration, this.id);
+    }
+
+    
 }

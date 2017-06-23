@@ -10,15 +10,17 @@ Conversation c = new Conversation(this, "Lea", "conversation_1");
 
 void setup(){
     delay(2000);
-    c.communicate();
+    //c.communicate();
+    BotPhrase x = new BotPhrase(13, new DBConnection(this));
+    x.callibrateDuration();
 }
 
 void draw(){
-    c.timeoutCallback();
+    //c.timeoutCallback();
 }
 
 void webSocketServerEvent(String _message){
-    c.onResponseFromUser(_message);
+    //c.onResponseFromUser(_message);
 }
 
 void exit(){
