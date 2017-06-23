@@ -18,11 +18,11 @@ void setup(){
 
     //x.callibrateDurationAll();
     if(!run){
-        int[] s = {0, 14};
-        BotPhrase x = new BotPhrase(14, new DBConnection(this));
-        BotPhrase temp = x.getRandomPhraseByType(2, s);
-        temp.speak();
-        println(temp.id);
+        // int[] s = {0, 14};
+        // BotPhrase x = new BotPhrase(14, new DBConnection(this));
+        // BotPhrase temp = x.getRandomPhraseByType(2, s);
+        // temp.speak();
+        // println(temp.id);
     }
 }
 

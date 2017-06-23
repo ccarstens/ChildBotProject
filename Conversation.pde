@@ -1,6 +1,6 @@
 class Conversation{
 
-    public static final int IDLE_TIMEOUT_1 = 5000;
+    public static final int IDLE_TIMEOUT_1 = 12000;
 
     protected WebsocketServer human;
 
@@ -32,7 +32,7 @@ class Conversation{
 
     public boolean inMeaningEvaluationMode;
 
-    public int[] spokenSequences = new int[1];
+    public ArrayList<Integer> spokenSequences = new ArrayList<Integer>();
 
 
     Conversation(PApplet _applet, String _voice,  String _table){
@@ -64,11 +64,11 @@ class Conversation{
         if(this.lastPhrase != null){
             if(this.currentPhrase.containsStringPlaceholder){
 
-                // if(this.inMeaningEvaluationMode){
-                    // speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.content);
-                // }else{
+                if(this.inMeaningEvaluationMode){
+                    speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
+                }else{
                     speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
-                // }
+                }
 
             }else if(this.currentPhrase.containsUsernamePlaceholder){
                 if(this.userSession.userName != null){
@@ -85,13 +85,8 @@ class Conversation{
             speakingSuccessful = this.currentPhrase.speak();
         }
 
-        if(this.currentPhrase.isBase() && this.currentPhrase.typeID < 4){
-            int[] temp = new int[this.spokenSequences.length + 1];
-            for(int i = 0; i < this.spokenSequences.length; i++){
-                temp[i] = this.spokenSequences[i];
-            }
-            temp[this.spokenSequences.length] = this.currentPhrase.id;
-            this.spokenSequences = temp;
+        if(this.currentPhrase.typeID == 2){
+            this.spokenSequences.add(this.currentPhrase.id);
         }
 
         if(speakingSuccessful){
@@ -101,14 +96,17 @@ class Conversation{
                     println("There is a timeout active but a new one will be set now");
                 }
                 this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
+                println("timeout");
+
             }else{
+                println("currentPhrase expects no response");
                 if(this.inMeaningEvaluationMode){
-                    this.leaveMeaningEvaluationMode();
+                    this.leaveMeaningEvaluationMode(this.lastResponse.meaningID);
                 }else if(this.inIdleUserMode){
                     println("LEAVE");
                 }else{
 
-
+                    println("nooo");
                     this.lastPhrase = this.currentPhrase;
                     this.currentPhrase = this.lastPhrase.getTrue();
                     if(this.currentPhrase != null){
@@ -142,29 +140,15 @@ class Conversation{
                 if(this.lastResponse.meansYes()){
                     println("means yes");
 
-                    // if(this.inMeaningEvaluationMode){
-                    //     this.lastResponseStorage.setMeaningYes();
-                    //     this.leaveMeaningEvaluationMode();
-                    // }
-
                     this.currentPhrase = this.lastPhrase.getTrue();
                 }else if(this.lastResponse.meansNo()){
                     println("means no");
-
-                    // if(this.inMeaningEvaluationMode){
-                    //     this.lastResponseStorage.setMeaningNo();
-                    //     this.leaveMeaningEvaluationMode();
-                    // }
 
                     this.currentPhrase = this.lastPhrase.getFalse();
                 }else{
                     println("ANSWER NOT UNDERSTOOD");
 
-                    if(!this.inMeaningEvaluationMode){
-                        this.meaningEvaluation();
-                    }else{
-                        println("HANDLE NEXT PHRASE WHEN EVALUATION FAILED");
-                    }
+                    this.enterMeaningEvaluationMode();
                 }
             }else{
                 this.lastStringResponse = this.lastResponse;
@@ -173,12 +157,18 @@ class Conversation{
 
                 this.currentPhrase = this.lastPhrase.getTrue();
             }
-            if(meaningEvalStateOnEntry || !this.inMeaningEvaluationMode){
+
+            if(!this.inMeaningEvaluationMode){
                 if(this.currentPhrase != null){
                     this.specialActionsOnResponse();
+                    println("current pid " + this.currentPhrase.id);
                     this.communicate();
                 }else{
                     println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+                }
+            }else{
+                if(this.currentPhrase.isExit){
+                    this.communicate();
                 }
             }
         }
@@ -238,7 +228,9 @@ class Conversation{
         if(!this.inIdleUserMode){
             println("enter IdleUser Mode");
             this.inIdleUserMode = true;
+            println("test");
             this.storePhrasesForModeChange("idleUser");
+            println("hey");
             this.idleUser();
         }else{
             this.idleUser();
@@ -258,6 +250,7 @@ class Conversation{
     }
 
     protected void idleUser(){
+        println("Idle User");
         for(BotPhrase p : this.currentPhraseStorage){
             print(p.id + " " + p.content);
         }
@@ -265,7 +258,9 @@ class Conversation{
 
         this.human.sendMessage("ABORT");
         if(this.currentPhrase == null){//first
-            this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
+            println("first");
+            // this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
+            this.currentPhrase = this.currentPhraseStorage.get(0).getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
             this.communicate();
         }else{//follow up
             this.currentPhrase = this.currentPhrase.getTrue();
@@ -278,36 +273,51 @@ class Conversation{
     }
 
     protected void enterMeaningEvaluationMode(){
-        if(!this.inMeaningEvaluationMode){
-            this.inMeaningEvaluationMode = true;
-            this.storePhrasesForModeChange("meaningEvaluation");
+        println("enter meaning evaluation for " + this.lastResponse.content);
+
+        this.inMeaningEvaluationMode = true;
+        this.storePhrasesForModeChange("meaningEvaluation");
+
+        this.meaningEvaluation();
+    }
+
+    protected void leaveMeaningEvaluationMode(int _meaning_id){
+        if(this.inMeaningEvaluationMode){
+            this.inMeaningEvaluationMode = false;
+
+            println("LastResponse " + this.lastResponse.content);
+            println("Last in LRS " + this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
+            // println("1 before Last in LRS " + this.lastResponseStorage.get(this.lastResponseStorage.size() - 2).content);
+
+            while(this.modeStack.size() != 0){
+
+                this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).setMeaningByID(_meaning_id);
+                this.loadPhrasesAfterModeChange();
+            }
+            this.lastPhrase = this.currentPhrase;
+            if(_meaning_id == ResponsePhrase.MEANING_YES){
+                this.currentPhrase = this.lastPhrase.getTrue();
+            }else if(_meaning_id == ResponsePhrase.MEANING_NO){
+                this.currentPhrase = this.lastPhrase.getFalse();
+            }
+
+            this.communicate();
+
         }
     }
 
-    protected void leaveMeaningEvaluationMode(){
-        // if(this.inMeaningEvaluationMode && this.currentPhrase.isExit){
-        //     this.inMeaningEvaluationMode = false;
-        //
-        //     if(this.lastResponse.meansYes()){
-        //         this.currentPhraseStorage = this.currentPhraseStorage.getTrue();
-        //     }else if(this.lastResponse.meansNo()){
-        //         this.currentPhraseStorage = this.currentPhraseStorage.getFalse();
-        //     }
-        //
-        //     this.loadPhrasesAfterModeChange();
-        //     this.terminateTimeout = true;
-        //     this.communicate();
-        // }
-    }
-
     protected void meaningEvaluation(){
-        // this.enterMeaningEvaluationMode();
-        // if(this.currentPhrase == null){
-        //     this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING, this.spokenSequences);
-        // }else{
-        //     this.currentPhrase = this.currentPhrase.getTrue();
-        // }
-        // this.communicate();
+        println("meaning eval");
+        if(this.currentPhrase == null){
+            println("current is null");
+            this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING, this.spokenSequences);
+            println("meaningEvaluation calls communicate because it was the first phrase");
+            this.communicate();
+        }else{
+            println("thank you");
+            this.currentPhrase = this.currentPhrase.getTrue();
+        }
+
     }
 
     protected void storePhrasesForModeChange(String _mode){
@@ -318,7 +328,7 @@ class Conversation{
 
         this.modeStack.add(_mode);
         this.currentPhrase = null;
-        println(this.lastPhraseStorage);
+        println(this.modeStack);
 
         // this.lastPhraseStorage = this.lastPhrase;
         // this.currentPhraseStorage = this.currentPhrase;

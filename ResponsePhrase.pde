@@ -45,4 +45,9 @@ class ResponsePhrase extends Phrase{
         this.meaningID = ResponsePhrase.MEANING_NO;
         this.db.query("UPDATE response_phrases SET meaning_id = %s WHERE id = %s", this.meaningID, this.id);
     }
+
+    public void setMeaningByID(int _meaning_id){
+        this.meaningID = _meaning_id;
+        this.db.query("UPDATE response_phrases SET meaning_id = %s WHERE id = %s", this.meaningID, this.id);
+    }
 }

@@ -5,7 +5,7 @@ public class BotPhrase extends Phrase{
     public static final String STRINGPLACEHOLDER = "$STRING";
     public static final String USERNAMEPLACEHOLDER = "$USERNAME";
 
-    public static final int MIC_OFFSET = 900;
+    public static final int MIC_OFFSET = 500;
 
     public static final int TYPE_START = 1;
     public static final int TYPE_CONVERSATION = 2;
@@ -90,12 +90,19 @@ public class BotPhrase extends Phrase{
         return new BotPhrase(this.nextPhraseFalse, this.db);
     }
 
-    public BotPhrase getRandomPhraseByType(int _type_id, int[] _spoken){
-        String[] s = new String[_spoken.length];
-        for(int i = 0; i < _spoken.length;i++){
-            s[i] = str(_spoken[i]);
+    public BotPhrase getRandomPhraseByType(int _type_id, ArrayList<Integer> _spoken){
+        String[] s = new String[_spoken.size()];
+        for(int i = 0; i < _spoken.size();i++){
+            s[i] = str(_spoken.get(i));
         }
-        String q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id + " AND id NOT IN (" + join(s, ",") +")";
+        String q;
+        if(s.length == 0){
+            q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id;
+        }else{
+            q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id + " AND id NOT IN (" + join(s, ",") +")";
+        }
+
+
         println("HERE: " + this.db.getResultCount(q));
         int[] ids = new int[this.db.getResultCount(q)];
 
