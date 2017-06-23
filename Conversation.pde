@@ -390,6 +390,10 @@ class Conversation{
         // this.lastStringResponse = this.lastStringResponseStorage;
     }
 
+    public void leaveConversation(){
+
+    }
+
 
 
 }
