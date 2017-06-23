@@ -27,6 +27,8 @@ class Conversation{
 
     public boolean inMeaningEvaluationMode;
 
+    public int[] spokenSequences = new int[1];
+
 
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
@@ -77,6 +79,16 @@ class Conversation{
         }else{
             speakingSuccessful = this.currentPhrase.speak();
         }
+
+        if(this.currentPhrase.isBase() && this.currentPhrase.typeID < 4){
+            int[] temp = new int[this.spokenSequences.length + 1];
+            for(int i = 0; i < this.spokenSequences.length; i++){
+                temp[i] = this.spokenSequences[i];
+            }
+            temp[this.spokenSequences.length] = this.currentPhrase.id;
+            this.spokenSequences = temp;
+        }
+
         if(speakingSuccessful){
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
@@ -93,10 +105,11 @@ class Conversation{
                     if(this.currentPhrase != null){
                         this.communicate();
                     }else{
-                        println("CALL NEXT PHRASE METHOD");
+                        //NEXT PHRASE SEQUENCE^
+                        this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
+                        this.communicate();
                     }
                 }
-
             }
 
         }
@@ -234,7 +247,7 @@ class Conversation{
         this.enterIdleUserMode();
         this.human.sendMessage("ABORT");
         if(this.currentPhrase == null){
-            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER);
+            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
         }else{
             this.currentPhrase = this.currentPhrase.getTrue();
         }
@@ -268,7 +281,7 @@ class Conversation{
     protected void meaningEvaluation(){
         this.enterMeaningEvaluationMode();
         if(this.currentPhrase == null){
-            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING);
+            this.currentPhrase = this.currentPhraseStorage.getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING, this.spokenSequences);
         }else{
             this.currentPhrase = this.currentPhrase.getTrue();
         }

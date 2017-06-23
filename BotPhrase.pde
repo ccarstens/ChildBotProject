@@ -5,14 +5,17 @@ public class BotPhrase extends Phrase{
     public static final String STRINGPLACEHOLDER = "$STRING";
     public static final String USERNAMEPLACEHOLDER = "$USERNAME";
 
+    public static final int MIC_OFFSET = 900;
+
     public static final int TYPE_START = 1;
     public static final int TYPE_CONVERSATION = 2;
     public static final int TYPE_LEAVE = 3;
     public static final int TYPE_IDLE_USER = 4;
     public static final int TYPE_EVAL_MEANING = 5;
 
+
     public int catID;
-    public boolean typeID;
+    public int typeID;
     public String expectedResponseType;
     public boolean isExit;
     public int nextPhraseTrue;
@@ -28,11 +31,12 @@ public class BotPhrase extends Phrase{
 
 
         this.catID = this.db.getInt("cat_id");
-        this.typeID = this.db.getBoolean("type_id");
+        this.typeID = this.db.getInt("type_id");
         this.expectedResponseType = this.db.getString("expected_response_type");
         this.isExit = this.db.getBoolean("is_exit_point");
         this.nextPhraseTrue = this.db.getInt("follow_up_phrase_id_if_true");
         this.nextPhraseFalse = this.db.getInt("follow_up_phrase_id_if_false");
+        this.duration = this.db.getInt("duration");
 
         this.containsStringPlaceholder = this.content.indexOf(BotPhrase.STRINGPLACEHOLDER) != -1;
         this.containsUsernamePlaceholder = this.content.indexOf(BotPhrase.USERNAMEPLACEHOLDER) != -1;
@@ -41,7 +45,11 @@ public class BotPhrase extends Phrase{
     }
 
     public boolean speak(){
-        this.say(this.content);
+        if(this.expectsResponse()){
+            this.say(this.content, this.duration, BotPhrase.MIC_OFFSET);
+        }else{
+            this.sayWaitFor(this.content);
+        }
         return true;
     }
 
@@ -66,6 +74,10 @@ public class BotPhrase extends Phrase{
         return this.expectedResponseType.equals(BotPhrase.STRING);
     }
 
+    public boolean isBase(){
+        return this.typeID > 0;
+    }
+
     public BotPhrase getTrue(){
         if(this.nextPhraseTrue > 0){
             return new BotPhrase(this.nextPhraseTrue, this.db);
@@ -78,10 +90,24 @@ public class BotPhrase extends Phrase{
         return new BotPhrase(this.nextPhraseFalse, this.db);
     }
 
-    public BotPhrase getRandomPhraseByType(int _type_id){
-        this.db.query("SELECT id FROM general_phrases WHERE type_id = %s", _type_id);
-        this.db.next();
-        return new BotPhrase(this.db.getInt("id"), this.db);
+    public BotPhrase getRandomPhraseByType(int _type_id, int[] _spoken){
+        String[] s = new String[_spoken.length];
+        for(int i = 0; i < _spoken.length;i++){
+            s[i] = str(_spoken[i]);
+        }
+        String q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id + " AND id NOT IN (" + join(s, ",") +")";
+        println("HERE: " + this.db.getResultCount(q));
+        int[] ids = new int[this.db.getResultCount(q)];
+
+        this.db.query(q);
+        int i = 0;
+        while(this.db.next()){
+            ids[i] = this.db.getInt("id");
+            i++;
+        }
+
+
+        return new BotPhrase(ids[floor(random(0, (ids.length - 1)))], this.db);
     }
 
     public void callibrateDuration(){
@@ -91,5 +117,14 @@ public class BotPhrase extends Phrase{
         this.db.query("UPDATE general_phrases SET duration = %s WHERE id = %s", this.duration, this.id);
     }
 
-    
+    public void callibrateDurationAll(){
+        DBConnection callibrationDB = new DBConnection(this.db.applet);
+        DBConnection constructDB = new DBConnection(this.db.applet);
+        callibrationDB.query("SELECT * FROM general_phrases");
+        while(callibrationDB.next()){
+            BotPhrase temp = new BotPhrase(callibrationDB.getInt("id"), constructDB);
+            temp.callibrateDuration();
+            delay(5);
+        }
+    }
 }

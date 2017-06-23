@@ -11,12 +11,13 @@ class TextToSpeech {
       return this.voice;
     }
 
-    public void say(String text){
+    public void say(String text, int duration, int offset){
         try{
             this.speechInProgress = true;
             Runtime r = Runtime.getRuntime();
+            delay(offset);
             Process p = r.exec("say -v  " + this.voice + " " + text);
-            p.waitFor();
+            p.waitFor(duration - offset, TimeUnit.MILLISECONDS);
             this.speechInProgress = false;
         }catch(IOException e){
             println("IOException");
