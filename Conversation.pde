@@ -2,6 +2,8 @@ class Conversation{
 
     public static final int IDLE_TIMEOUT_1 = 12000;
 
+    public static final int LEAVE_CONVERATION_DELAY = 60000;
+
     protected WebsocketServer human;
 
     protected PApplet applet;
@@ -457,7 +459,7 @@ class Conversation{
     public void leaveConversation(){
         this.userSession.close();
         println("LEAVE");
-        delay(30 * 1000);
+        delay(Conversation.LEAVE_CONVERATION_DELAY);
         println("playing mode now");
 
         this.enterPlayingMode();
@@ -467,6 +469,10 @@ class Conversation{
     public void startConversation(){
 
         this.enterPlayingMode();
+    }
+
+    public void nextRandomPhrase(){
+
     }
 
 
