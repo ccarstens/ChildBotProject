@@ -62,8 +62,10 @@ class Conversation{
 
     void communicate(){
         println("\n " + this.spokenSequences.size() + " \n");
-        if(this.spokenSequences.size() >= 3 && this.currentPhrase.typeID == 2){
-            println("LEAVE BECAUSE MORE THAN SEVEN");
+        if(this.spokenSequences.size() >= 7 && this.currentPhrase.typeID == 2){
+            this.currentPhrase = new BotPhrase(137, this.db);
+            this.currentPhrase.speak();
+            this.leaveConversation();
         }else{
             println("Communicate in Thread : " + Thread.currentThread().getId());
             boolean speakingSuccessful;
