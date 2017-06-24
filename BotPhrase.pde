@@ -103,19 +103,25 @@ public class BotPhrase extends Phrase{
             q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id + " AND id NOT IN (" + join(s, ",") +")";
         }
 
+        int resultCount = this.db.getResultCount(q);
+        println("HERE: " + resultCount);
+        if(resultCount == 0){
+            return null;
+        }{
+            int[] ids = new int[this.db.getResultCount(q)];
 
-        println("HERE: " + this.db.getResultCount(q));
-        int[] ids = new int[this.db.getResultCount(q)];
-
-        this.db.query(q);
-        int i = 0;
-        while(this.db.next()){
-            ids[i] = this.db.getInt("id");
-            i++;
+            this.db.query(q);
+            int i = 0;
+            while(this.db.next()){
+                ids[i] = this.db.getInt("id");
+                i++;
+            }
+            return new BotPhrase(ids[floor(random(0, (ids.length - 1)))], this.db);
         }
 
 
-        return new BotPhrase(ids[floor(random(0, (ids.length - 1)))], this.db);
+
+
     }
 
     public void callibrateDuration(){

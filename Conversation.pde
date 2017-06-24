@@ -67,6 +67,13 @@ class Conversation{
                 if(this.inMeaningEvaluationMode){
                     speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
                 }else{
+
+                    if(this.currentPhrase.id == 77){
+                        String q = "SELECT * FROM responses r LEFT JOIN response_phrases rp ON r.response_phrase_id = rp.id WHERE meaning_id = 100 AND r.phrase_id = 75";
+                        int count = this.db.getResultCount(q);
+                        speakingSuccessful = this.currentPhrase.speak(str(count));
+                    }
+
                     speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
                 }
 
@@ -127,7 +134,13 @@ class Conversation{
                         }else{
                             //NEXT PHRASE SEQUENCE^
                             this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                            this.communicate();
+                            if(this.currentPhrase == null){ //all the phrases have been used already);
+                                this.currentPhrase = new BotPhrase(137, this.db);
+                                this.currentPhrase.speak();
+                                this.leaveConversation();
+                            }else{
+                                this.communicate();
+                            }
                         }
                     }
 
@@ -184,6 +197,7 @@ class Conversation{
                     this.communicate();
                 }else{
                     println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
+                    this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
                 }
             }else{
                 if(this.currentPhrase.isExit){
@@ -364,6 +378,7 @@ class Conversation{
     protected void leavePlayingMode(){
         this.inPlayingMode = false;
         this.currentPhrase = this.staticPhrase.getRandomPhraseByType(1, this.spokenSequences);
+        // this.currentPhrase = new BotPhrase(75, this.db);
         this.userSession = new UserSession(new DBConnection(this.applet));
         this.communicate();
     }

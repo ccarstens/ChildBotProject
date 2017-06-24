@@ -5,7 +5,7 @@ import java.lang.*;
 import java.util.concurrent.TimeUnit;
 
 
-boolean run = false;
+boolean run = true;
 
 
     Conversation c;
