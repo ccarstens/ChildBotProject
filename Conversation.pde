@@ -244,7 +244,7 @@ class Conversation{
     public void timeoutCallback(){
         if(this.timeoutActive){
             if(!this.terminateTimeout){
-                println(millis() - this.timeoutStart);
+                // println(millis() - this.timeoutStart);
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
                     switch(this.timeoutMethod){
