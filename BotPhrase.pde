@@ -5,7 +5,7 @@ public class BotPhrase extends Phrase{
     public static final String STRINGPLACEHOLDER = "$STRING";
     public static final String USERNAMEPLACEHOLDER = "$USERNAME";
 
-    public static final int MIC_OFFSET = 700;
+    public static final int MIC_OFFSET = 500;
 
     public static final int TYPE_START = 1;
     public static final int TYPE_CONVERSATION = 2;
