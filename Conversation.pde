@@ -62,7 +62,7 @@ class Conversation{
 
     void communicate(){
         println("\n " + this.spokenSequences.size() + " \n");
-        if(this.spokenSequences.size() >= 7 && this.currentPhrase.typeID == 2){
+        if(this.spokenSequences.size() >= 16 && this.currentPhrase.typeID == 2){
             this.currentPhrase = new BotPhrase(137, this.db);
             this.currentPhrase.speak();
             this.leaveConversation();
@@ -466,6 +466,7 @@ class Conversation{
 
     public void leaveConversation(){
         this.userSession.close();
+        this.spokenSequences = new ArrayList<Integer>();
         println("LEAVE");
         delay(Conversation.LEAVE_CONVERATION_DELAY);
         println("playing mode now");
