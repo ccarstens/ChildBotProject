@@ -61,96 +61,102 @@ class Conversation{
     }
 
     void communicate(){
-        println("Communicate in Thread : " + Thread.currentThread().getId());
-        boolean speakingSuccessful;
-        if(this.lastPhrase != null){
-            if(this.currentPhrase.containsStringPlaceholder){
+        println("\n " + this.spokenSequences.size() + " \n");
+        if(this.spokenSequences.size() >= 3 && this.currentPhrase.typeID == 2){
+            println("LEAVE BECAUSE MORE THAN SEVEN");
+        }else{
+            println("Communicate in Thread : " + Thread.currentThread().getId());
+            boolean speakingSuccessful;
+            if(this.lastPhrase != null){
+                if(this.currentPhrase.containsStringPlaceholder){
 
-                if(this.inMeaningEvaluationMode){
-                    speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
-                }else{
+                    if(this.inMeaningEvaluationMode){
+                        speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
+                    }else{
 
-                    if(this.currentPhrase.id == 77){
-                        String q = "SELECT * FROM responses r LEFT JOIN response_phrases rp ON r.response_phrase_id = rp.id WHERE meaning_id = 100 AND r.phrase_id = 75";
-                        int count = this.db.getResultCount(q);
-                        speakingSuccessful = this.currentPhrase.speak(str(count));
+                        if(this.currentPhrase.id == 77){
+                            String q = "SELECT * FROM responses r LEFT JOIN response_phrases rp ON r.response_phrase_id = rp.id WHERE meaning_id = 100 AND r.phrase_id = 75";
+                            int count = this.db.getResultCount(q);
+                            speakingSuccessful = this.currentPhrase.speak(str(count));
+                        }
+
+                        speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
                     }
 
-                    speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
-                }
+                }else if(this.currentPhrase.containsUsernamePlaceholder){
+                    if(this.userSession.userName != null){
+                        speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
+                    }else{
+                        this.currentPhrase.content = this.currentPhrase.content.replaceAll("\\" + BotPhrase.USERNAMEPLACEHOLDER, "");
+                        speakingSuccessful = this.currentPhrase.speak();
+                    }
 
-            }else if(this.currentPhrase.containsUsernamePlaceholder){
-                if(this.userSession.userName != null){
-                    speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
                 }else{
-                    this.currentPhrase.content = this.currentPhrase.content.replaceAll("\\" + BotPhrase.USERNAMEPLACEHOLDER, "");
                     speakingSuccessful = this.currentPhrase.speak();
                 }
-
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
             }
-        }else{
-            speakingSuccessful = this.currentPhrase.speak();
-        }
 
-        if(this.currentPhrase.typeID == 2){
-            this.spokenSequences.add(this.currentPhrase.id);
-        }
+            if(this.currentPhrase.typeID == 2){
+                this.spokenSequences.add(this.currentPhrase.id);
+            }
 
-        if(speakingSuccessful){
+            if(speakingSuccessful){
 
 
 
-            if(this.currentPhrase.expectsResponse()){
-                this.human.sendMessage("READY");
-                if(this.timeoutActive){
-                    println("There is a timeout active but a new one will be set now");
-                }
-                if(this.inPlayingMode){
-                    this.setTimeout(Conversation.IDLE_TIMEOUT_1, "playingMode");
-                }else{
-                    this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
-                    println("timeout");
-                }
-
-
-            }else{
-                println("currentPhrase expects no response");
-                if(this.inMeaningEvaluationMode){
-                    this.leaveMeaningEvaluationMode(this.lastResponse.meaningID);
-                }else if(this.inIdleUserMode){
-                    this.leaveConversation();
-                }else if(this.inPlayingMode){
-                    println("still in playing mode");
-                    this.playingMode();
-                }else{
-
-                    if(this.currentPhrase.typeID == 3){
-                        this.leaveConversation();
+                if(this.currentPhrase.expectsResponse()){
+                    this.human.sendMessage("READY");
+                    if(this.timeoutActive){
+                        println("There is a timeout active but a new one will be set now");
+                    }
+                    if(this.inPlayingMode){
+                        this.setTimeout(Conversation.IDLE_TIMEOUT_1, "playingMode");
                     }else{
-                        this.lastPhrase = this.currentPhrase;
-                        this.currentPhrase = this.lastPhrase.getTrue();
-                        if(this.currentPhrase != null){
-                            this.communicate();
-                        }else{
-                            //NEXT PHRASE SEQUENCE^
-                            this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                            if(this.currentPhrase == null){ //all the phrases have been used already);
-                                this.currentPhrase = new BotPhrase(137, this.db);
-                                this.currentPhrase.speak();
-                                this.leaveConversation();
-                            }else{
-                                this.communicate();
-                            }
-                        }
+                        this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
+                        println("timeout");
                     }
 
 
-                }
-            }
+                }else{
+                    println("currentPhrase expects no response");
+                    if(this.inMeaningEvaluationMode){
+                        this.leaveMeaningEvaluationMode(this.lastResponse.meaningID);
+                    }else if(this.inIdleUserMode){
+                        this.leaveConversation();
+                    }else if(this.inPlayingMode){
+                        println("still in playing mode");
+                        this.playingMode();
+                    }else{
 
+                        if(this.currentPhrase.typeID == 3){
+                            this.leaveConversation();
+                        }else{
+                            this.lastPhrase = this.currentPhrase;
+                            this.currentPhrase = this.lastPhrase.getTrue();
+                            if(this.currentPhrase != null){
+                                this.communicate();
+                            }else{
+                                //NEXT PHRASE SEQUENCE^
+                                this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
+                                if(this.currentPhrase == null){ //all the phrases have been used already);
+                                    this.currentPhrase = new BotPhrase(137, this.db);
+                                    this.currentPhrase.speak();
+                                    this.leaveConversation();
+                                }else{
+                                    this.communicate();
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+
+            }
         }
+
     }
 
     void onResponseFromUser(String _message){
