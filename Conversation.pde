@@ -198,6 +198,7 @@ class Conversation{
                 }else{
                     println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
                     this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
+                    this.communicate();
                 }
             }else{
                 if(this.currentPhrase.isExit){
