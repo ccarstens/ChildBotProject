@@ -12,7 +12,7 @@ class Conversation{
 
     UserSession userSession;
 
-    protected BotPhrase lastPhrase, currentPhrase;
+    protected BotPhrase lastPhrase, currentPhrase, staticPhrase;
     protected ArrayList<BotPhrase> lastPhraseStorage = new ArrayList<BotPhrase>();
     protected ArrayList<BotPhrase> currentPhraseStorage = new ArrayList<BotPhrase>();
 
@@ -27,10 +27,8 @@ class Conversation{
     protected boolean terminateTimeout;
     protected boolean timeoutActive;
 
-    public boolean inIdleUserMode;
+    public boolean inIdleUserMode, inMeaningEvaluationMode, inPlayingMode;
     protected int idleUserModeInterations;
-
-    public boolean inMeaningEvaluationMode;
 
     public ArrayList<Integer> spokenSequences = new ArrayList<Integer>();
 
@@ -44,7 +42,7 @@ class Conversation{
 
         this.human = new WebsocketServer(this.applet, 7777, "/childbo");
 
-        this.userSession = new UserSession(new DBConnection(this.applet));
+
 
         this.terminateTimeout = false;
         this.timeoutActive = false;
@@ -52,9 +50,11 @@ class Conversation{
         this.inIdleUserMode = false;
         this.idleUserModeInterations = 0;
 
-        this.currentPhrase = new BotPhrase(14, this.db);
-
+        this.staticPhrase = new BotPhrase(1, this.db);
         this.launchServer();
+        this.startConversation();
+
+
 
     }
 
@@ -90,32 +90,48 @@ class Conversation{
         }
 
         if(speakingSuccessful){
+
+
+
             if(this.currentPhrase.expectsResponse()){
                 this.human.sendMessage("READY");
                 if(this.timeoutActive){
                     println("There is a timeout active but a new one will be set now");
                 }
-                this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
-                println("timeout");
+                if(this.inPlayingMode){
+                    this.setTimeout(Conversation.IDLE_TIMEOUT_1, "playingMode");
+                }else{
+                    this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
+                    println("timeout");
+                }
+
 
             }else{
                 println("currentPhrase expects no response");
                 if(this.inMeaningEvaluationMode){
                     this.leaveMeaningEvaluationMode(this.lastResponse.meaningID);
                 }else if(this.inIdleUserMode){
-                    println("LEAVE");
+                    this.leaveConversation();
+                }else if(this.inPlayingMode){
+                    println("still in playing mode");
+                    this.playingMode();
                 }else{
 
-                    println("nooo");
-                    this.lastPhrase = this.currentPhrase;
-                    this.currentPhrase = this.lastPhrase.getTrue();
-                    if(this.currentPhrase != null){
-                        this.communicate();
+                    if(this.currentPhrase.typeID == 3){
+                        this.leaveConversation();
                     }else{
-                        //NEXT PHRASE SEQUENCE^
-                        this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                        this.communicate();
+                        this.lastPhrase = this.currentPhrase;
+                        this.currentPhrase = this.lastPhrase.getTrue();
+                        if(this.currentPhrase != null){
+                            this.communicate();
+                        }else{
+                            //NEXT PHRASE SEQUENCE^
+                            this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
+                            this.communicate();
+                        }
                     }
+
+
                 }
             }
 
@@ -131,9 +147,12 @@ class Conversation{
         boolean meaningEvalStateOnEntry = this.inMeaningEvaluationMode;
 
         this.logResponse();
-
+        println("after log");
         if(this.inIdleUserMode){
             this.leaveIdleUserMode();
+        }else if(this.inPlayingMode){
+            println("should leave now");
+            this.leavePlayingMode();
         }else{
             if(currentPhrase.isBool()){
                 println("Meaning ID: " + this.lastResponse.meaningID);
@@ -176,7 +195,13 @@ class Conversation{
     }
 
     public void logResponse(){
-        this.db.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", this.userSession.id, this.lastPhrase.id, this.lastResponse.id);
+        int sessionID;
+        if(this.userSession != null){
+            sessionID = this.userSession.id;
+        }else{
+            sessionID = 0;
+        }
+        this.db.query("INSERT INTO responses (session_id, phrase_id, response_phrase_id) VALUES (%s, %s, %s)", sessionID, this.lastPhrase.id, this.lastResponse.id);
     }
 
     public void specialActionsOnResponse(){
@@ -202,12 +227,16 @@ class Conversation{
     public void timeoutCallback(){
         if(this.timeoutActive){
             if(!this.terminateTimeout){
-                // println(millis() - this.timeoutStart);
+                println(millis() - this.timeoutStart);
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
                     switch(this.timeoutMethod){
                         case "idleUser": {
                             this.enterIdleUserMode();
+                            break;
+                        }
+                        case "playingMode":{
+                            this.playingMode();
                             break;
                         }
                     }
@@ -320,6 +349,25 @@ class Conversation{
 
     }
 
+    protected void enterPlayingMode(){
+        this.inPlayingMode = true;
+        this.playingMode();
+    }
+
+    protected void playingMode(){
+        delay(5000);
+        println("playing mode delay");
+        this.currentPhrase = this.staticPhrase.getRandomPhraseByType(6, this.spokenSequences);
+        this.communicate();
+    }
+
+    protected void leavePlayingMode(){
+        this.inPlayingMode = false;
+        this.currentPhrase = this.staticPhrase.getRandomPhraseByType(1, this.spokenSequences);
+        this.userSession = new UserSession(new DBConnection(this.applet));
+        this.communicate();
+    }
+
     protected void storePhrasesForModeChange(String _mode){
         this.lastPhraseStorage.add(this.lastPhrase);
         this.currentPhraseStorage.add(this.currentPhrase);
@@ -391,7 +439,18 @@ class Conversation{
     }
 
     public void leaveConversation(){
+        this.userSession.close();
+        println("LEAVE");
+        delay(30 * 1000);
+        println("playing mode now");
 
+        this.enterPlayingMode();
+
+    }
+
+    public void startConversation(){
+
+        this.enterPlayingMode();
     }
 
 

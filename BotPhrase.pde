@@ -97,6 +97,7 @@ public class BotPhrase extends Phrase{
         }
         String q;
         if(s.length == 0){
+            println("short");
             q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id;
         }else{
             q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id + " AND id NOT IN (" + join(s, ",") +")";

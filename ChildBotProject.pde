@@ -5,18 +5,24 @@ import java.lang.*;
 import java.util.concurrent.TimeUnit;
 
 
-boolean run = true;
+boolean run = false;
 
-Conversation c = new Conversation(this, "Lea", "conversation_1");
+
+    Conversation c;
+
 
 void setup(){
+
     delay(2000);
+
     if(run){
-        c.communicate();
+        c = new Conversation(this, "Lea", "conversation_1");
     }
 
-
-    //x.callibrateDurationAll();
+    BotPhrase x = new BotPhrase(1, new DBConnection(this));
+    if(!run){
+        x.callibrateDurationAll();
+    }
     if(!run){
         // int[] s = {0, 14};
         // BotPhrase x = new BotPhrase(14, new DBConnection(this));
