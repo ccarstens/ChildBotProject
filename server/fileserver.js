@@ -12,10 +12,34 @@ fileserver.use(function (request, response, next) {
     next();
 });
 
-fileserver.use(express.static("./public_html"));
+fileserver.use(express.static("../public_html"));
 
 fileserver.get("/get-phrases", function (request, response) {
-    response.json("hello");
+
+    var mysql = require("mysql");
+    var con = mysql.createConnection({
+        host: "localhost",
+        port: 8889,
+        user: "root",
+        password: "root",
+        database: "childbot"
+    });
+
+    var mysqlresult = "";
+    con.connect(function (err) {
+        if(err) throw err;
+        console.log("Connected");
+        var i = 2;
+        con.query(`SELECT * FROM general_phrases WHERE type_id = ${i}`, function (err, result) {
+            result.forEach(function (v, k) {
+                response.write(v.content);
+            });
+            console.log(mysqlresult);
+        });
+    });
+
+
+
 });
 
 fileserver.listen(3000);
