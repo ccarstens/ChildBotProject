@@ -124,7 +124,7 @@ class Conversation{
                         if(this.currentPhrase != null){
                             this.communicate();
                         }else{
-                            //NEXT PHRASE SEQUENCE^
+                            println("### HANDLING (communicate) END OF SEQUENCE; HANDLING FOR NEXT SEQUENCE BY GROUP NEEDED ");
                             this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
                             if(this.currentPhrase == null){ //all the phrases have been used already);
                                 this.currentPhrase = new BotPhrase(137, this.db);
@@ -182,7 +182,7 @@ class Conversation{
                 this.specialActionsOnResponse();
                 this.communicate();
             }else{
-                println("### END OF SEQUENCE, HANDLE NEXT SEQUENCE IN SAME GROUP OR GROUP CHANGE");
+                println("### (onResponseFromUser) END OF SEQUENCE, HANDLE NEXT SEQUENCE IN SAME GROUP OR GROUP CHANGE");
                 // this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
                 // this.communicate();
             }

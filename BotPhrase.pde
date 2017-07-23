@@ -45,10 +45,10 @@ public class BotPhrase extends Phrase{
     }
 
     public boolean speak(){
-        if(this.expectsResponse()){
-            this.say(this.content, this.duration, BotPhrase.MIC_OFFSET);
-        }else{
+        if(this.containsStringPlaceholder || this.containsUsernamePlaceholder){
             this.sayWaitFor(this.content);
+        }else{
+            this.say(this.content, this.duration, BotPhrase.MIC_OFFSET);
         }
         return true;
     }
