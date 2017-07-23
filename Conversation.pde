@@ -29,7 +29,7 @@ class Conversation{
     protected boolean terminateTimeout;
     protected boolean timeoutActive;
 
-    public boolean inIdleUserMode, inMeaningEvaluationMode, inPlayingMode;
+    public boolean inIdleUserMode, inPlayingMode;
     protected int idleUserModeInterations;
 
     public ArrayList<Integer> spokenSequences = new ArrayList<Integer>();
@@ -61,159 +61,130 @@ class Conversation{
     }
 
     void communicate(){
-        println("\n " + this.spokenSequences.size() + " \n");
-        if(this.spokenSequences.size() >= 16 && this.currentPhrase.typeID == 2){
-            this.currentPhrase = new BotPhrase(137, this.db);
-            this.currentPhrase.speak();
-            this.leaveConversation();
-        }else{
-            println("Communicate in Thread : " + Thread.currentThread().getId());
-            boolean speakingSuccessful;
-            if(this.lastPhrase != null){
-                if(this.currentPhrase.containsStringPlaceholder){
+        boolean speakingSuccessful;
+        if(this.lastPhrase != null){
+            if(this.currentPhrase.containsStringPlaceholder){
 
-                    if(this.inMeaningEvaluationMode){
-                        speakingSuccessful = this.currentPhrase.speak(this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
-                    }else{
+                if(this.currentPhrase.id == 77){
+                    String q = "SELECT * FROM responses r LEFT JOIN response_phrases rp ON r.response_phrase_id = rp.id WHERE meaning_id = 100 AND r.phrase_id = 75";
+                    int count = this.db.getResultCount(q);
+                    speakingSuccessful = this.currentPhrase.speak(str(count));
+                }
 
-                        if(this.currentPhrase.id == 77){
-                            String q = "SELECT * FROM responses r LEFT JOIN response_phrases rp ON r.response_phrase_id = rp.id WHERE meaning_id = 100 AND r.phrase_id = 75";
-                            int count = this.db.getResultCount(q);
-                            speakingSuccessful = this.currentPhrase.speak(str(count));
-                        }
+                speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
 
-                        speakingSuccessful = this.currentPhrase.speak(this.lastStringResponse.content);
-                    }
-
-                }else if(this.currentPhrase.containsUsernamePlaceholder){
-                    if(this.userSession.userName != null){
-                        speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
-                    }else{
-                        this.currentPhrase.content = this.currentPhrase.content.replaceAll("\\" + BotPhrase.USERNAMEPLACEHOLDER, "");
-                        speakingSuccessful = this.currentPhrase.speak();
-                    }
-
+            }else if(this.currentPhrase.containsUsernamePlaceholder){
+                if(this.userSession.userName != null){
+                    speakingSuccessful = this.currentPhrase.speak(this.userSession.userName);
                 }else{
+                    this.currentPhrase.content = this.currentPhrase.content.replaceAll("\\" + BotPhrase.USERNAMEPLACEHOLDER, "");
                     speakingSuccessful = this.currentPhrase.speak();
                 }
+
             }else{
                 speakingSuccessful = this.currentPhrase.speak();
             }
-
-            if(this.currentPhrase.typeID == 2){
-                this.spokenSequences.add(this.currentPhrase.id);
-            }
-
-            if(speakingSuccessful){
-
-
-
-                if(this.currentPhrase.expectsResponse()){
-                    this.human.sendMessage("READY");
-                    if(this.timeoutActive){
-                        println("There is a timeout active but a new one will be set now");
-                    }
-                    if(this.inPlayingMode){
-                        this.setTimeout(Conversation.IDLE_TIMEOUT_1, "playingMode");
-                    }else{
-                        this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
-                        println("timeout");
-                    }
-
-
-                }else{
-                    println("currentPhrase expects no response");
-                    if(this.inMeaningEvaluationMode){
-                        this.leaveMeaningEvaluationMode(this.lastResponse.meaningID);
-                    }else if(this.inIdleUserMode){
-                        this.leaveConversation();
-                    }else if(this.inPlayingMode){
-                        println("still in playing mode");
-                        this.playingMode();
-                    }else{
-
-                        if(this.currentPhrase.typeID == 3){
-                            this.leaveConversation();
-                        }else{
-                            this.lastPhrase = this.currentPhrase;
-                            this.currentPhrase = this.lastPhrase.getTrue();
-                            if(this.currentPhrase != null){
-                                this.communicate();
-                            }else{
-                                //NEXT PHRASE SEQUENCE^
-                                this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                                if(this.currentPhrase == null){ //all the phrases have been used already);
-                                    this.currentPhrase = new BotPhrase(137, this.db);
-                                    this.currentPhrase.speak();
-                                    this.leaveConversation();
-                                }else{
-                                    this.communicate();
-                                }
-                            }
-                        }
-
-
-                    }
-                }
-
-            }
+        }else{
+            speakingSuccessful = this.currentPhrase.speak();
         }
 
+        if(this.currentPhrase.typeID == 2){
+            this.spokenSequences.add(this.currentPhrase.id);
+        }
+
+        if(speakingSuccessful){
+
+
+
+            if(this.currentPhrase.expectsResponse()){
+                this.human.sendMessage("READY");
+                if(this.timeoutActive){
+                    println("There is a timeout active but a new one will be set now");
+                }
+                if(this.inPlayingMode){
+                    this.setTimeout(Conversation.IDLE_TIMEOUT_1, "playingMode");
+                }else{
+                    this.setTimeout(Conversation.IDLE_TIMEOUT_1, "idleUser");
+                    println("timeout");
+                }
+
+
+            }else{
+                if(this.inIdleUserMode){
+                    this.leaveConversation();
+                }else if(this.inPlayingMode){
+                    this.playingMode();
+                }else{
+
+                    if(this.currentPhrase.typeID == 3){
+                        this.leaveConversation();
+                    }else{
+                        this.lastPhrase = this.currentPhrase;
+                        this.currentPhrase = this.lastPhrase.getTrue();
+                        if(this.currentPhrase != null){
+                            this.communicate();
+                        }else{
+                            //NEXT PHRASE SEQUENCE^
+                            this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
+                            if(this.currentPhrase == null){ //all the phrases have been used already);
+                                this.currentPhrase = new BotPhrase(137, this.db);
+                                this.currentPhrase.speak();
+                                this.leaveConversation();
+                            }else{
+                                this.communicate();
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     void onResponseFromUser(String _message){
-        println("received message " + _message);
+        println("\n\n\nreceived message " + _message);
         this.terminateTimeout = true;
         this.lastResponse = new ResponsePhrase(_message, this.db);
         this.lastPhrase = this.currentPhrase;
 
-        boolean meaningEvalStateOnEntry = this.inMeaningEvaluationMode;
-
         this.logResponse();
-        println("after log");
+
         if(this.inIdleUserMode){
             this.leaveIdleUserMode();
         }else if(this.inPlayingMode){
-            println("should leave now");
             this.leavePlayingMode();
         }else{
             if(currentPhrase.isBool()){
-                println("Meaning ID: " + this.lastResponse.meaningID);
                 if(this.lastResponse.meansYes()){
-                    println("means yes");
 
                     this.currentPhrase = this.lastPhrase.getTrue();
                 }else if(this.lastResponse.meansNo()){
-                    println("means no");
 
                     this.currentPhrase = this.lastPhrase.getFalse();
-                }else{
-                    println("ANSWER NOT UNDERSTOOD");
 
-                    this.enterMeaningEvaluationMode();
+                }else if(this.lastResponse.isAmbiguous()){
+
+                    println("### HANDLE AMBIGUOUS RESPONSE");
+
+                }else if(this.lastResponse.meansRepeat()){
+
+                    println("### REPEAT THE CURRENT PHRASE");
+
+                }else{
+                    println("### ANSWER NOT UNDERSTOOD - NOT HANDLED ATM");
                 }
             }else{
                 this.lastStringResponse = this.lastResponse;
-                println(_message);
-                //is string
 
                 this.currentPhrase = this.lastPhrase.getTrue();
             }
 
-            if(!this.inMeaningEvaluationMode){
-                if(this.currentPhrase != null){
-                    this.specialActionsOnResponse();
-                    println("current pid " + this.currentPhrase.id);
-                    this.communicate();
-                }else{
-                    println("CALL NEXT PHRASE METHOD AFTER RECEIVING RESPONSE");
-                    this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                    this.communicate();
-                }
+            if(this.currentPhrase != null){
+                this.specialActionsOnResponse();
+                this.communicate();
             }else{
-                if(this.currentPhrase.isExit){
-                    this.communicate();
-                }
+                println("### END OF SEQUENCE, HANDLE NEXT SEQUENCE IN SAME GROUP OR GROUP CHANGE");
+                // this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
+                // this.communicate();
             }
         }
 
@@ -323,54 +294,6 @@ class Conversation{
 
 
 
-
-    }
-
-    protected void enterMeaningEvaluationMode(){
-        println("enter meaning evaluation for " + this.lastResponse.content);
-
-        this.inMeaningEvaluationMode = true;
-        this.storePhrasesForModeChange("meaningEvaluation");
-
-        this.meaningEvaluation();
-    }
-
-    protected void leaveMeaningEvaluationMode(int _meaning_id){
-        if(this.inMeaningEvaluationMode){
-            this.inMeaningEvaluationMode = false;
-
-            println("LastResponse " + this.lastResponse.content);
-            println("Last in LRS " + this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).content);
-            // println("1 before Last in LRS " + this.lastResponseStorage.get(this.lastResponseStorage.size() - 2).content);
-
-            while(this.modeStack.size() != 0){
-
-                this.lastResponseStorage.get(this.lastResponseStorage.size() - 1).setMeaningByID(_meaning_id);
-                this.loadPhrasesAfterModeChange();
-            }
-            this.lastPhrase = this.currentPhrase;
-            if(_meaning_id == ResponsePhrase.MEANING_YES){
-                this.currentPhrase = this.lastPhrase.getTrue();
-            }else if(_meaning_id == ResponsePhrase.MEANING_NO){
-                this.currentPhrase = this.lastPhrase.getFalse();
-            }
-
-            this.communicate();
-
-        }
-    }
-
-    protected void meaningEvaluation(){
-        println("meaning eval");
-        if(this.currentPhrase == null){
-            println("current is null");
-            this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByType(BotPhrase.TYPE_EVAL_MEANING, this.spokenSequences);
-            println("meaningEvaluation calls communicate because it was the first phrase");
-            this.communicate();
-        }else{
-            println("thank you");
-            this.currentPhrase = this.currentPhrase.getTrue();
-        }
 
     }
 

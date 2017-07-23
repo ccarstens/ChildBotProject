@@ -1,6 +1,8 @@
 class ResponsePhrase extends Phrase{
     public static final int MEANING_YES = 100;
     public static final int MEANING_NO = 101;
+    public static final int MEANING_AMB = 102;
+    public static final int MEANING_REPEAT = 103;
 
     public int meaningID;
 
@@ -34,6 +36,14 @@ class ResponsePhrase extends Phrase{
 
     public boolean meansNo(){
         return this.meaningID == ResponsePhrase.MEANING_NO;
+    }
+
+    public boolean isAmbiguous(){
+        return this.meaningID == ResponsePhrase.MEANING_AMB;
+    }
+
+    public boolean meansRepeat(){
+        return this.meaningID == ResponsePhrase.MEANING_REPEAT;
     }
 
     public void setMeaningYes(){
