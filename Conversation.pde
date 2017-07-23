@@ -403,13 +403,4 @@ class Conversation{
 
         this.spokenSequences = new ArrayList<Integer>();
     }
-
-    public void nextRandomPhrase(){
-
-    }
-
-
-
-
-
 }

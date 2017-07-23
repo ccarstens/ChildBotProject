@@ -97,17 +97,16 @@ public class BotPhrase extends Phrase{
         }
         String q;
         if(s.length == 0){
-            println("short");
             q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id;
         }else{
             q = "SELECT id FROM general_phrases WHERE type_id = " + _type_id + " AND id NOT IN (" + join(s, ",") +")";
         }
 
         int resultCount = this.db.getResultCount(q);
-        println("HERE: " + resultCount);
+        // println("HERE: " + resultCount);
         if(resultCount == 0){
             return null;
-        }{
+        }else{
             int[] ids = new int[this.db.getResultCount(q)];
 
             this.db.query(q);
@@ -116,7 +115,7 @@ public class BotPhrase extends Phrase{
                 ids[i] = this.db.getInt("id");
                 i++;
             }
-            return new BotPhrase(ids[floor(random(0, (ids.length - 1)))], this.db);
+            return new BotPhrase(ids[floor(random(0, (ids.length)))], this.db);
         }
 
 

@@ -5,30 +5,33 @@ import java.lang.*;
 import java.util.concurrent.TimeUnit;
 
 
-boolean run = true;
+boolean run = false;
+boolean callibrate = false;
 
-
-    Conversation c;
+Conversation c;
 
 
 void setup(){
 
-    delay(2000);
+
 
     if(run){
+        delay(2000);
         c = new Conversation(this, "Lea", "conversation_1");
+    }else{
+        BotPhrase x = new BotPhrase(1, new DBConnection(this));
+        ArrayList<Integer> spoken = new ArrayList<Integer>();
+
+        for(int i = 0;i< 100;i++){
+            BotPhrase y = x.getRandomPhraseByType(5, spoken);
+            println(y.id);
+        }
     }
 
-    BotPhrase x = new BotPhrase(1, new DBConnection(this));
-    if(!run){
+
+    if(callibrate){
+        BotPhrase x = new BotPhrase(1, new DBConnection(this));
         x.callibrateDurationAll();
-    }
-    if(!run){
-        // int[] s = {0, 14};
-        // BotPhrase x = new BotPhrase(14, new DBConnection(this));
-        // BotPhrase temp = x.getRandomPhraseByType(2, s);
-        // temp.speak();
-        // println(temp.id);
     }
 }
 
@@ -47,7 +50,8 @@ void webSocketServerEvent(String _message){
 void exit(){
     if(run){
         c.userSession.close();
+        println(c.spokenSequences);
     }
-    println(c.spokenSequences);
+
     super.exit();
 }
