@@ -30,9 +30,9 @@ class Conversation{
     protected boolean timeoutActive;
 
     public boolean inIdleUserMode, inPlayingMode;
-    protected int idleUserModeInterations;
+    protected int idleUserModeIterations;
 
-    public ArrayList<Integer> spokenSequences = new ArrayList<Integer>();
+    public ArrayList<Integer> spokenSequences;
 
 
     Conversation(PApplet _applet, String _voice,  String _table){
@@ -40,24 +40,12 @@ class Conversation{
 
         this.db = new DBConnection(this.applet);
 
-
-
         this.human = new WebsocketServer(this.applet, 7777, "/childbo");
 
-
-
-        this.terminateTimeout = false;
-        this.timeoutActive = false;
-
-        this.inIdleUserMode = false;
-        this.idleUserModeInterations = 0;
-
         this.staticPhrase = new BotPhrase(1, this.db);
+
         this.launchServer();
         this.startConversation();
-
-
-
     }
 
     void communicate(){
@@ -251,11 +239,9 @@ class Conversation{
 
     protected void enterIdleUserMode(){
         if(!this.inIdleUserMode){
-            println("enter IdleUser Mode");
+            this.idleUserModeIterations++;
             this.inIdleUserMode = true;
-            println("test");
             this.storePhrasesForModeChange("idleUser");
-            println("hey");
             this.idleUser();
         }else{
             this.idleUser();
@@ -299,6 +285,7 @@ class Conversation{
 
     protected void enterPlayingMode(){
         this.inPlayingMode = true;
+        this.resetOperativeValues();
         this.playingMode();
     }
 
@@ -403,9 +390,25 @@ class Conversation{
         this.enterPlayingMode();
     }
 
+    public void resetOperativeValues(){
+        this.terminateTimeout = false;
+        this.timeoutActive = false;
+        this.inIdleUserMode = false;
+
+        this.userSession = null;
+        this.lastPhrase = this.currentPhrase = null;
+        this.lastResponse = this.lastStringResponse = null;
+
+        this.idleUserModeIterations = 0;
+
+        this.spokenSequences = new ArrayList<Integer>();
+    }
+
     public void nextRandomPhrase(){
 
     }
+
+
 
 
 

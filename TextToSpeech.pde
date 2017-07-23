@@ -12,6 +12,7 @@ class TextToSpeech {
     }
 
     public void say(String text, int duration, int offset){
+        println("say");
         try{
             this.speechInProgress = true;
             Runtime r = Runtime.getRuntime();
@@ -27,6 +28,7 @@ class TextToSpeech {
     }
 
     public void sayWaitFor(String text){
+        println("sayWaitFor");
         try{
             this.speechInProgress = true;
             Runtime r = Runtime.getRuntime();
