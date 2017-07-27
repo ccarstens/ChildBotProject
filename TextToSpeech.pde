@@ -16,7 +16,6 @@ class TextToSpeech {
         try{
             this.speechInProgress = true;
             Runtime r = Runtime.getRuntime();
-            delay(offset);
             Process p = r.exec("say -v  " + this.voice + " " + text);
             p.waitFor(duration - offset, TimeUnit.MILLISECONDS);
             this.speechInProgress = false;

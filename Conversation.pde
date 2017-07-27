@@ -4,6 +4,9 @@ class Conversation{
 
     public static final int LEAVE_CONVERATION_DELAY = 60000;
 
+    public static final int SETTING_CASUAL_PHRASES = 2;
+    public static final int SETTING_DEEP_PHRASES = 2;
+
     protected WebsocketServer human;
 
     protected PApplet applet;
@@ -33,7 +36,8 @@ class Conversation{
     protected int idleUserModeIterations;
 
     public ArrayList<Integer> spokenSequences;
-
+    public int numberOfSequencesInCurrentGroup;
+    public int currentConvoGroupID;
 
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
@@ -42,7 +46,7 @@ class Conversation{
 
         this.human = new WebsocketServer(this.applet, 7777, "/childbo");
 
-        this.staticPhrase = new BotPhrase(1, this.db);
+        this.staticPhrase = new BotPhrase(2, this.db);
 
         this.launchServer();
         this.startConversation();
@@ -108,19 +112,13 @@ class Conversation{
                         this.leaveConversation();
                     }else{
                         this.lastPhrase = this.currentPhrase;
-                        this.currentPhrase = this.lastPhrase.getTrue();
+                        this.currentPhrase = this.lastPhrase.getFollowUpYes();
                         if(this.currentPhrase != null){
                             this.communicate();
                         }else{
-                            println("### HANDLING (communicate) END OF SEQUENCE; HANDLING FOR NEXT SEQUENCE BY GROUP NEEDED ");
-                            this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                            if(this.currentPhrase == null){ //all the phrases have been used already);
-                                this.currentPhrase = new BotPhrase(137, this.db);
-                                this.currentPhrase.speak();
-                                this.leaveConversation();
-                            }else{
-                                this.communicate();
-                            }
+                            println("### CALLING NEXTSEQUENCE");
+                            this.nextSequence();
+                            this.communicate();
                         }
                     }
                 }
@@ -132,7 +130,13 @@ class Conversation{
         println("\n\n\nreceived message " + _message);
         this.terminateTimeout = true;
         this.lastResponse = new ResponsePhrase(_message, this.db);
-        this.lastPhrase = this.currentPhrase;
+        println("AFTER CREATING NEW RESPONSE");
+
+        //if the phrase to which the user responded was an ambiguity follow up, the lastPhrase should not be overwritten
+        if(this.currentPhrase.typeID != BotPhrase.TYPE_AMB_FOLLOW){
+            this.lastPhrase = this.currentPhrase;
+        }
+
 
         this.logResponse();
 
@@ -144,26 +148,31 @@ class Conversation{
             if(currentPhrase.isBool()){
                 if(this.lastResponse.meansYes()){
 
-                    this.currentPhrase = this.lastPhrase.getTrue();
+                    this.currentPhrase = this.lastPhrase.getFollowUpYes();
+                    this.lastPhrase.reactToYes();
                 }else if(this.lastResponse.meansNo()){
 
-                    this.currentPhrase = this.lastPhrase.getFalse();
-
+                    this.currentPhrase = this.lastPhrase.getFollowUpNo();
+                    this.lastPhrase.reactToNo();
                 }else if(this.lastResponse.isAmbiguous()){
 
-                    println("### HANDLE AMBIGUOUS RESPONSE");
+                    this.currentPhrase = this.lastPhrase.getFollowUpAmb();
+                    this.lastPhrase.reactToAmb();
 
                 }else if(this.lastResponse.meansRepeat()){
 
                     println("### REPEAT THE CURRENT PHRASE");
 
                 }else{
-                    println("### ANSWER NOT UNDERSTOOD - NOT HANDLED ATM");
+                    println("### ANSWER NOT UNDERSTOOD - NOT HANDLED ATM - WAS MEINST DU DAMIT SEQUENCE");
+                    this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(6, this.spokenSequences);
                 }
             }else{
                 this.lastStringResponse = this.lastResponse;
 
-                this.currentPhrase = this.lastPhrase.getTrue();
+                //in a normal case this just gets the Yes option for a string phrase, if the last phrase was a ambiguity follow up, last phrase was not updated so this gets the boolean yes option for the previous phrase to which the user responded with something unknown or ambiguous.
+                this.currentPhrase = this.lastPhrase.getFollowUpYes();
+                this.lastPhrase.reactToYes();
             }
 
             if(this.currentPhrase != null){
@@ -171,8 +180,8 @@ class Conversation{
                 this.communicate();
             }else{
                 println("### (onResponseFromUser) END OF SEQUENCE, HANDLE NEXT SEQUENCE IN SAME GROUP OR GROUP CHANGE");
-                // this.currentPhrase = this.lastPhrase.getRandomPhraseByType(2, this.spokenSequences);
-                // this.communicate();
+                this.nextSequence();
+                this.communicate();
             }
         }
 
@@ -270,11 +279,11 @@ class Conversation{
         this.human.sendMessage("ABORT");
         if(this.currentPhrase == null){//first
             println("first");
-            // this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
-            this.currentPhrase = this.currentPhraseStorage.get(0).getRandomPhraseByType(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
+            // this.currentPhrase = this.currentPhraseStorage.get(this.currentPhraseStorage.size() - 1).getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
+            this.currentPhrase = this.currentPhraseStorage.get(0).getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_IDLE_USER, this.spokenSequences);
             this.communicate();
         }else{//follow up
-            this.currentPhrase = this.currentPhrase.getTrue();
+            this.currentPhrase = this.currentPhrase.getFollowUpYes();
             this.communicate();
         }
 
@@ -292,13 +301,14 @@ class Conversation{
     protected void playingMode(){
         delay(5000);
         println("playing mode delay");
-        this.currentPhrase = this.staticPhrase.getRandomPhraseByType(6, this.spokenSequences);
+        this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_PLAYING, this.spokenSequences);
+        println("IDICATOR");
         this.communicate();
     }
 
     protected void leavePlayingMode(){
         this.inPlayingMode = false;
-        this.currentPhrase = this.staticPhrase.getRandomPhraseByType(1, this.spokenSequences);
+        this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_START, this.spokenSequences);
         // this.currentPhrase = new BotPhrase(75, this.db);
         this.userSession = new UserSession(new DBConnection(this.applet));
         this.communicate();
@@ -402,5 +412,37 @@ class Conversation{
         this.idleUserModeIterations = 0;
 
         this.spokenSequences = new ArrayList<Integer>();
+        this.numberOfSequencesInCurrentGroup = 0;
+        this.currentConvoGroupID = BotPhrase.GROUP_CASUAL;
+    }
+
+    public void nextSequence(){
+        println("Sequences spoken so far: " + this.numberOfSequencesInCurrentGroup);
+        println("Current Group: " + this.currentConvoGroupID);
+
+        int maxSequencesInCurrentGroup;
+        if(this.currentConvoGroupID == BotPhrase.GROUP_CASUAL){
+            maxSequencesInCurrentGroup = this.SETTING_CASUAL_PHRASES;
+        }else if(this.currentConvoGroupID == BotPhrase.GROUP_DEEP){
+            maxSequencesInCurrentGroup = this.SETTING_DEEP_PHRASES;
+        }else{
+            maxSequencesInCurrentGroup = 1;
+        }
+
+        if(this.numberOfSequencesInCurrentGroup == maxSequencesInCurrentGroup){
+            if(this.currentConvoGroupID <= BotPhrase.GROUP_DEEP){
+                this.currentConvoGroupID++;
+                this.numberOfSequencesInCurrentGroup = 0;
+            }else{
+                println("TRYING TO ACCESS GROUP 23");
+            }
+        }
+
+        this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(this.currentConvoGroupID, this.spokenSequences);
+
+
+
+        //a new sequence was chosen, so the count for the number of sequences in current group can be iterated one up
+        this.numberOfSequencesInCurrentGroup++;
     }
 }

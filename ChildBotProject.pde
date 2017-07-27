@@ -3,9 +3,10 @@ import websockets.*;
 import java.util.Date;
 import java.lang.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-
-boolean run = false;
+boolean run = true;
 boolean callibrate = false;
 
 Conversation c;
@@ -18,19 +19,31 @@ void setup(){
     if(run){
         delay(2000);
         c = new Conversation(this, "Lea", "conversation_1");
-    }else{
-        BotPhrase x = new BotPhrase(1, new DBConnection(this));
-        ArrayList<Integer> spoken = new ArrayList<Integer>();
+    }else if(!callibrate){
 
-        for(int i = 0;i< 100;i++){
-            BotPhrase y = x.getRandomPhraseByType(5, spoken);
-            println(y.id);
-        }
+
+
+
+
+        BotPhrase x = new BotPhrase(152, new DBConnection(this));
+        x.callibrateDuration();
+
+
+        // BotPhrase b = new BotPhrase(2, new DBConnection(this));
+        // ArrayList<Integer> s = new ArrayList<Integer>();
+        // for(int i = 0;i< 20;i++){
+        //     BotPhrase x = b.getRandomPhraseByTypeOrGroup(7, s);
+        //     println(x.content);
+        // }
+
+
+
+
     }
 
 
     if(callibrate){
-        BotPhrase x = new BotPhrase(1, new DBConnection(this));
+        BotPhrase x = new BotPhrase(2, new DBConnection(this));
         x.callibrateDurationAll();
     }
 }
