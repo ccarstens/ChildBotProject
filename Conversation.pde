@@ -147,15 +147,16 @@ class Conversation{
         }else{
             if(currentPhrase.isBool()){
                 if(this.lastResponse.meansYes()){
-
+                    println("YES");
                     this.currentPhrase = this.lastPhrase.getFollowUpYes();
                     this.lastPhrase.reactToYes();
                 }else if(this.lastResponse.meansNo()){
+                    println("NO");
                     this.currentPhrase = this.lastPhrase.getFollowUpNo();
                     this.lastPhrase.reactToNo();
 
                 }else if(this.lastResponse.isAmbiguous()){
-
+                    println("AMB");
                     this.currentPhrase = this.lastPhrase.getFollowUpAmb();
                     this.lastPhrase.reactToAmb();
 
@@ -167,6 +168,7 @@ class Conversation{
 
 
                 if(this.lastResponse.hasNoKnownMeaning() || (this.lastResponse.isAmbiguous() && this.currentPhrase == null)){
+                    println("NO KNOWN MEANIING OR IS AMB AND NO AMB FOLLOW UP");
                     this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
                 }
 
