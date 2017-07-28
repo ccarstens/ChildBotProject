@@ -173,12 +173,13 @@ class Conversation{
                 if(this.lastResponse.hasNoKnownMeaning() || (this.lastResponse.isAmbiguous() && this.currentPhrase == null)){
                     println("NO KNOWN MEANIING OR IS AMB AND NO AMB FOLLOW UP");
                     if(this.lastResponse.hasNoKnownMeaning()){
-                        this.notUnderstoodAnswers++;
+
                         if(this.notUnderstoodAnswers < 3){
                             this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
                         }else{
                             this.currentPhrase = this.currentPhrase.getFollowUpYes();
                         }
+                        this.notUnderstoodAnswers++;
                     }else{
                         this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
                     }
