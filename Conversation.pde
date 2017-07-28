@@ -180,7 +180,12 @@ class Conversation{
                 this.lastStringResponse = this.lastResponse;
 
                 //in a normal case this just gets the Yes option for a string phrase, if the last phrase was a ambiguity follow up, last phrase was not updated so this gets the boolean yes option for the previous phrase to which the user responded with something unknown or ambiguous.
-                this.currentPhrase = this.lastPhrase.getFollowUpYes();
+                if(this.lastResponse.meansNo()){
+                    this.currentPhrase = this.lastPhrase.getFollowUpNo();
+                }else{
+                    this.currentPhrase = this.lastPhrase.getFollowUpYes();
+                }
+
                 this.lastPhrase.reactToYes();
             }
 
