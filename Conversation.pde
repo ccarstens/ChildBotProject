@@ -150,6 +150,7 @@ class Conversation{
                     println("YES");
                     this.currentPhrase = this.lastPhrase.getFollowUpYes();
                     this.lastPhrase.reactToYes();
+
                 }else if(this.lastResponse.meansNo()){
                     println("NO");
                     this.currentPhrase = this.lastPhrase.getFollowUpNo();
@@ -207,10 +208,14 @@ class Conversation{
 
     public void specialActionsOnResponse(){
         if(this.lastPhrase != null){
-            if(this.lastPhrase.id == 15){
+            if(this.lastPhrase.id == 142){
                 String tempUserName = this.lastStringResponse.content.replaceAll("(?i)\\b(ich|bin|ist|heiße|mein|name|hallo|hi|nennt|man|mich|kennt|als|der|die|leute|nennen| )\\b", "");
                 println(tempUserName);
                 this.userSession.userName = tempUserName;
+            }else if(this.lastPhrase.id == 143){
+                if(this.lastResponse.meansNo()){
+                    this.userSession.userName = "";
+                }
             }
         }
 
