@@ -4,8 +4,8 @@ class Conversation{
 
     public static final int LEAVE_CONVERATION_DELAY = 60000;
 
-    public static final int SETTING_CASUAL_PHRASES = 2;
-    public static final int SETTING_DEEP_PHRASES = 2;
+    public static final int SETTING_CASUAL_PHRASES = 4;
+    public static final int SETTING_DEEP_PHRASES = 4;
 
     protected WebsocketServer human;
 
