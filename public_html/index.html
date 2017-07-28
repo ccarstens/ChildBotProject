@@ -26,7 +26,12 @@
             }else if(e.data == "ABORT"){
                 recognition.stop();
             }
-        }
+        };
+
+        recognition.onspeechend = function(event){
+            console.log("speech end");
+            recognition.stop();
+        };
 
         recognition.onresult = function(event) {
             console.log("finished");
@@ -36,7 +41,7 @@
             // Send the result string via WebSocket to the running Processing Sketch
             ws.send(transcript);
 //            console.log(transcript);
-        }
+        };
         // Start the recognition
 //        recognition.start();
 

@@ -46,6 +46,10 @@ class ResponsePhrase extends Phrase{
         return this.meaningID == ResponsePhrase.MEANING_REPEAT;
     }
 
+    public boolean hasNoKnownMeaning(){
+        return this.meaningID == 0;
+    }
+
     public void setMeaningYes(){
         this.meaningID = ResponsePhrase.MEANING_YES;
         this.db.query("UPDATE response_phrases SET meaning_id = %s WHERE id = %s", this.meaningID, this.id);

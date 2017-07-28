@@ -141,12 +141,20 @@ public class BotPhrase extends Phrase{
     }
 
     public BotPhrase getFollowUpNo(){
-        return new BotPhrase(this.nextPhraseNo, this.db);
+        if(this.nextPhraseNo > 0){
+            return new BotPhrase(this.nextPhraseNo, this.db);
+        }
+        return null;
     }
 
     public BotPhrase getFollowUpAmb(){
-        return new BotPhrase(this.nextPhraseAmb, this.db);
+        if(this.nextPhraseAmb > 0){
+            return new BotPhrase(this.nextPhraseAmb, this.db);
+        }
+        return null;
     }
+
+
 
     public BotPhrase getRandomPhraseByTypeOrGroup(int _testTypeGroupID, ArrayList<Integer> _spoken){
         String[] s = new String[_spoken.size()];
@@ -196,7 +204,7 @@ public class BotPhrase extends Phrase{
     public void callibrateDurationAll(){
         DBConnection callibrationDB = new DBConnection(this.db.applet);
         DBConnection constructDB = new DBConnection(this.db.applet);
-        callibrationDB.query("SELECT * FROM general_phrases WHERE content <> '' AND id > 100");
+        callibrationDB.query("SELECT * FROM general_phrases WHERE content <> ''");
         while(callibrationDB.next()){
             BotPhrase temp = new BotPhrase(callibrationDB.getInt("id"), constructDB);
             temp.callibrateDuration();

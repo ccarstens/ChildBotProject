@@ -24,7 +24,6 @@ void setup(){
 
 
 
-
         BotPhrase x = new BotPhrase(152, new DBConnection(this));
         x.callibrateDuration();
 

@@ -151,9 +151,9 @@ class Conversation{
                     this.currentPhrase = this.lastPhrase.getFollowUpYes();
                     this.lastPhrase.reactToYes();
                 }else if(this.lastResponse.meansNo()){
-
                     this.currentPhrase = this.lastPhrase.getFollowUpNo();
                     this.lastPhrase.reactToNo();
+
                 }else if(this.lastResponse.isAmbiguous()){
 
                     this.currentPhrase = this.lastPhrase.getFollowUpAmb();
@@ -163,10 +163,16 @@ class Conversation{
 
                     println("### REPEAT THE CURRENT PHRASE");
 
-                }else{
-                    println("### ANSWER NOT UNDERSTOOD - NOT HANDLED ATM - WAS MEINST DU DAMIT SEQUENCE");
-                    this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(6, this.spokenSequences);
                 }
+
+
+                if(this.lastResponse.hasNoKnownMeaning() || (this.lastResponse.isAmbiguous() && this.currentPhrase == null)){
+                    this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
+                }
+
+
+
+
             }else{
                 this.lastStringResponse = this.lastResponse;
 
@@ -220,7 +226,7 @@ class Conversation{
     public void timeoutCallback(){
         if(this.timeoutActive){
             if(!this.terminateTimeout){
-                // println(millis() - this.timeoutStart);
+                println(millis() - this.timeoutStart);
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
                     switch(this.timeoutMethod){
@@ -301,6 +307,7 @@ class Conversation{
     protected void playingMode(){
         delay(5000);
         println("playing mode delay");
+
         this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_PLAYING, this.spokenSequences);
         println("IDICATOR");
         this.communicate();
