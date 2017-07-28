@@ -39,6 +39,8 @@ class Conversation{
     public int numberOfSequencesInCurrentGroup;
     public int currentConvoGroupID;
 
+    public int notUnderstoodAnswers;
+
     Conversation(PApplet _applet, String _voice,  String _table){
         this.applet = _applet;
 
@@ -170,7 +172,16 @@ class Conversation{
 
                 if(this.lastResponse.hasNoKnownMeaning() || (this.lastResponse.isAmbiguous() && this.currentPhrase == null)){
                     println("NO KNOWN MEANIING OR IS AMB AND NO AMB FOLLOW UP");
-                    this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
+                    if(this.lastResponse.hasNoKnownMeaning()){
+                        this.notUnderstoodAnswers++;
+                        if(this.notUnderstoodAnswers < 3){
+                            this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
+                        }else{
+                            this.currentPhrase = this.currentPhrase.getFollowUpYes();
+                        }
+                    }else{
+                        this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_AMB_FOLLOW, this.spokenSequences);
+                    }
                 }
 
 
@@ -433,6 +444,8 @@ class Conversation{
         this.spokenSequences = new ArrayList<Integer>();
         this.numberOfSequencesInCurrentGroup = 0;
         this.currentConvoGroupID = BotPhrase.GROUP_CASUAL;
+
+        this.notUnderstoodAnswers = 0;
     }
 
     public void nextSequence(){
