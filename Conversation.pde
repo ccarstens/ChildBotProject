@@ -250,7 +250,7 @@ class Conversation{
     public void timeoutCallback(){
         if(this.timeoutActive){
             if(!this.terminateTimeout){
-                println(millis() - this.timeoutStart);
+                // println(millis() - this.timeoutStart);
                 if(millis() - this.timeoutStart >= this.timeoutDuration){
                     this.timeoutActive = false;
                     switch(this.timeoutMethod){
@@ -333,7 +333,7 @@ class Conversation{
         println("playing mode delay");
 
         this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_PLAYING, this.spokenSequences);
-        println("IDICATOR");
+        println("PLAYING MODE IDICATOR");
         this.communicate();
     }
 
