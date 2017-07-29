@@ -331,7 +331,7 @@ class Conversation{
     protected void playingMode(){
         delay(5000);
         println("playing mode delay");
-
+        this.human.sendMessage("ABORT");
         this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_PLAYING, this.spokenSequences);
         println("PLAYING MODE IDICATOR");
         this.communicate();
