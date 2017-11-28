@@ -226,7 +226,7 @@ class Conversation{
     public void specialActionsOnResponse(){
         if(this.lastPhrase != null){
             if(this.lastPhrase.id == 142){
-                String tempUserName = this.lastStringResponse.content.replaceAll("(?i)\\b(ich|bin|ist|heiße|mein|name|hallo|hi|nennt|man|mich|kennt|als|der|die|leute|nennen| )\\b", "");
+                String tempUserName = this.lastStringResponse.content.replaceAll("(?i)\\b(ich|bin|ist|heiße|mein|name|hallo|hi|nennt|man|mich|kennt|als|der|die|leute|wie|heißt|du|und|nennen| )\\b", "");
                 println(tempUserName);
                 this.userSession.userName = tempUserName;
             }else if(this.lastPhrase.id == 143){
@@ -331,7 +331,7 @@ class Conversation{
     protected void playingMode(){
         delay(5000);
         println("playing mode delay");
-        this.human.sendMessage("ABORT");
+
         this.currentPhrase = this.staticPhrase.getRandomPhraseByTypeOrGroup(BotPhrase.TYPE_PLAYING, this.spokenSequences);
         println("PLAYING MODE IDICATOR");
         this.communicate();
