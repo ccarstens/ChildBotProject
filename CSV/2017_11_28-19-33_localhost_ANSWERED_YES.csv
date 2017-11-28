@@ -1,0 +1,6 @@
+"Date","User Name","Phrase ID","Phrase","Response","Expected Response Type","Meaning ID"
+"2017-11-08 01:16:30","cornelius",2,"Darf man Menschen, die man nicht mag töten?","ja","BOOL",100
+"2017-11-07 16:35:09","cornelius",2,"Darf man Menschen, die man nicht mag töten?","ja","BOOL",100
+"2017-11-02 15:57:40","cornelius",2,"Darf man Menschen, die man nicht mag töten?","ja","BOOL",100
+"2017-07-28 20:31:28","Nelly",2,"Darf man Menschen, die man nicht mag töten?","ich denke schon","BOOL",100
+"2017-07-28 20:21:21","Nelly",2,"Darf man Menschen, die man nicht mag töten?","ich glaube ja","BOOL",100

@@ -1,0 +1,5 @@
+"Date","User Name","Phrase ID","Phrase","Response","Expected Response Type","Meaning ID"
+"2017-11-09 15:40:16","Enrico",2,"Darf man Menschen, die man nicht mag töten?","nein man darf niemanden töten","BOOL",NULL
+"2017-07-29 19:59:51","Flo",2,"Darf man Menschen, die man nicht mag töten?","nein Gottes willen","BOOL",NULL
+"2017-07-28 20:21:33","Nelly",2,"Darf man Menschen, die man nicht mag töten?","wenn Leute wird dann ich kann dann finde ich das kann","BOOL",NULL
+"2017-07-28 17:38:13","",2,"Darf man Menschen, die man nicht mag töten?","hast du gesagt ja","BOOL",NULL

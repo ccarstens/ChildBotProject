@@ -1,0 +1,49 @@
+"Date","User Name","Phrase ID","Phrase","Response","Expected Response Type","Meaning ID"
+"2017-11-09 15:34:23","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-11-09 15:25:54","Katharina",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-11-09 15:15:30","Marie",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-11-01 14:23:02","cornelius",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 20:33:25","",2,"Darf man Menschen, die man nicht mag töten?","ich denke nicht","BOOL",101
+"2017-07-29 20:28:34","cornelius",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 19:55:43","Toni",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 19:04:25","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 18:51:21","Lea",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 18:37:47","",2,"Darf man Menschen, die man nicht mag töten?","nö","BOOL",101
+"2017-07-29 18:25:37","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 18:16:41","Jan",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:55:33","Karina",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:50:33","Sonja",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:36:40","Tanjawieheißtdu",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:32:17","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:20:36","Sally",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:11:59","Andreassowieheißtdu",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:06:27","Urlaub",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 17:01:58","wieheißtdu",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 16:56:56","Christian",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 16:47:52","Sophie",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 16:30:30","Annette",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 16:25:16","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 16:09:42","Birgit",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 15:14:42",NULL,2,"Darf man Menschen, die man nicht mag töten?","nein natürlich nicht","BOOL",101
+"2017-07-29 15:09:38","Dominik",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 14:53:14","",2,"Darf man Menschen, die man nicht mag töten?","nein auf keinen Fall","BOOL",101
+"2017-07-29 14:47:29","Marie",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 14:24:51","Jason",2,"Darf man Menschen, die man nicht mag töten?","nein darf man nicht","BOOL",101
+"2017-07-29 14:16:50","komme",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 14:03:09","Sonja",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-29 13:47:46","",2,"Darf man Menschen, die man nicht mag töten?","nein nein","BOOL",101
+"2017-07-28 19:46:14","Meikewieheißtdu",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 19:36:57","Olivia",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 19:32:53","unddusetztaufdasKissengehen",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 19:25:40","Heiko",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 19:16:40","Judith",2,"Darf man Menschen, die man nicht mag töten?","nein darf man nicht","BOOL",101
+"2017-07-28 17:58:01","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 17:49:48","Markusunddu",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 17:38:17","",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 17:33:42","Rebecca",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 17:18:02","Miriam",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 17:13:03","null",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 17:03:42","Ben",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 16:38:18","Moritz",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 16:27:43","Basti",2,"Darf man Menschen, die man nicht mag töten?","nein","BOOL",101
+"2017-07-28 16:22:41","Fabian",2,"Darf man Menschen, die man nicht mag töten?","nein nein","BOOL",101
